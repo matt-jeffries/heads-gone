@@ -1,0 +1,1 @@
+window.WIKIDATA_CATEGORIES = [];

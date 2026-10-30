@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>Head's Gone!</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Permanent+Marker&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap">
+<style>
+/* Layout: one-screen app, a stack of full-height screens; menus look like a sticker album, play is a full-bleed card. */
+:root {
+  --navy: #142a63;
+  --navy-deep: #0c1a42;
+  --navy-line: #2a4185;
+  --gold: #f5c244;
+  --chalk: #f3efe4;
+  --chalk-dim: #b6bfd8;
+  --correct: #23a85f;
+  --pass: #ee7b2a;
+  --display: "Anton", "Impact", "Arial Narrow Bold", sans-serif;
+  --body: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+[hidden] { display: none !important; }
+body {
+  background: var(--navy-deep);
+  color: var(--chalk);
+  font: 600 17px/1.35 var(--body);
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+.screen {
+  height: 100%;
+  overflow-y: auto;
+  padding-block: 20px 28px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 20px;
+  max-width: 720px; margin: 0 auto;
+}
+.wordmark { font: 400 clamp(52px, 15vw, 96px)/0.9 var(--display); letter-spacing: 0.01em; color: var(--gold); text-transform: uppercase; text-wrap: balance; }
+.wordmark span { color: var(--chalk); }
+.lede { color: var(--chalk-dim); max-width: 34em; margin: 0; }
+h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; letter-spacing: 0.01em; text-wrap: balance; }
+.eyebrow { font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 52px; padding: 0 22px; border-radius: 10px;
+  font: 400 22px/1 var(--display); text-transform: uppercase; letter-spacing: 0.03em;
+  background: var(--gold); color: var(--navy-deep);
+}
+.btn.ghost { background: transparent; color: var(--chalk); box-shadow: inset 0 0 0 2px var(--navy-line); }
+.btn.small { min-height: 40px; font-size: 17px; padding: 0 14px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+/* Game-in-progress strip */
+.strip { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  background: var(--navy); border-radius: 12px; padding: 12px 14px; }
+.strip b { color: var(--gold); }
+
+/* Category stickers */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.sticker {
+  text-align: left; display: flex; flex-direction: column; gap: 6px; min-height: 128px;
+  padding: 14px; border-radius: 12px; background: var(--navy);
+  border: 2px solid var(--navy-line); position: relative; overflow: hidden;
+  transition: transform .12s ease, border-color .12s ease;
+}
+.sticker:hover, .sticker:focus-visible { border-color: var(--gold); transform: translateY(-2px); }
+.sticker .no { position: absolute; top: 10px; right: 12px; font: 400 15px/1 var(--display); color: var(--chalk-dim); font-variant-numeric: tabular-nums; }
+.sticker .name { font: 400 24px/1.02 var(--display); text-transform: uppercase; color: var(--chalk); padding-right: 28px; text-wrap: balance; }
+.sticker .blurb { font-size: 14px; color: var(--chalk-dim); font-weight: 500; }
+.sticker .count { margin-top: auto; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); }
+.sticker.mix { background: var(--gold); border-color: var(--gold); }
+.sticker.mix .name, .sticker.mix .count, .sticker.mix .no { color: var(--navy-deep); }
+.sticker.mix .blurb { color: var(--navy); }
+
+/* Setup */
+.field { display: flex; flex-direction: column; gap: 8px; }
+.label { font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--chalk-dim); }
+.players { display: flex; flex-direction: column; gap: 8px; }
+.player-row { display: flex; gap: 8px; }
+.player-row input {
+  flex: 1; min-width: 0; height: 48px; padding: 0 14px; border-radius: 10px;
+  border: 2px solid var(--navy-line); background: var(--navy); color: var(--chalk);
+  font: 600 18px var(--body);
+}
+.player-row button { width: 48px; border-radius: 10px; background: var(--navy); color: var(--chalk-dim); font-size: 22px; }
+.seg { display: inline-flex; background: var(--navy); border-radius: 10px; padding: 4px; gap: 4px; flex-wrap: wrap; }
+.seg button { min-height: 42px; padding: 0 16px; border-radius: 7px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--chalk-dim); }
+.seg button[aria-pressed="true"] { background: var(--gold); color: var(--navy-deep); }
+.hint { font-size: 14px; color: var(--chalk-dim); font-weight: 500; margin: 0; }
+
+/* Ready */
+.ready { justify-content: center; text-align: center; align-items: center; }
+.ready .who { font: 400 clamp(56px, 16vw, 110px)/0.95 var(--display); text-transform: uppercase; color: var(--gold); text-wrap: balance; overflow-wrap: anywhere; }
+.howto { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 420px; }
+.howto div { border-radius: 12px; padding: 12px; font-size: 15px; }
+.howto b { display: block; font: 400 22px/1.1 var(--display); text-transform: uppercase; }
+.howto .down { background: var(--correct); }
+.howto .up { background: var(--pass); }
+
+/* Play */
+#play { position: fixed; inset: 0; max-width: none; padding: 0; gap: 0; background: var(--navy); overflow: hidden; transition: background .15s; }
+#play.correct { background: var(--correct); }
+#play.pass { background: var(--pass); }
+#play.over { background: var(--navy-deep); }
+.hud {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: calc(10px + env(safe-area-inset-top, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  font: 400 28px/1 var(--display); font-variant-numeric: tabular-nums;
+}
+.hud .clock.low { color: var(--gold); }
+.card { flex: 1; display: grid; place-items: center; padding: 8px max(24px, env(safe-area-inset-right, 0px)) 8px max(24px, env(safe-area-inset-left, 0px)); min-height: 0; }
+.card-name { font: 400 72px/0.98 var(--display); text-transform: uppercase; text-align: center; text-wrap: balance; max-width: 100%; }
+.card-tag { font: 400 26px/1 var(--display); text-transform: uppercase; letter-spacing: 0.04em; opacity: .9; text-align: center; margin-bottom: 6px; }
+.taps { display: flex; gap: 10px; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.taps button { flex: 1; min-height: 52px; border-radius: 10px; font: 400 20px/1 var(--display); text-transform: uppercase; }
+.taps .p { background: rgba(238,123,42,.9); }
+.taps .c { background: rgba(35,168,95,.9); }
+#play.correct .taps button, #play.pass .taps button { background: rgba(12,26,66,.25); }
+.quit { font: 600 15px var(--body); color: var(--chalk-dim); text-transform: uppercase; letter-spacing: .08em; }
+
+/* Results */
+.big-score { font: 400 120px/0.85 var(--display); color: var(--gold); font-variant-numeric: tabular-nums; }
+.log { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; }
+.log li { padding: 8px 12px; border-radius: 8px; display: flex; gap: 10px; align-items: baseline; font-size: 17px; }
+.log li.ok { background: rgba(35,168,95,.22); }
+.log li.no { background: rgba(238,123,42,.18); color: var(--chalk-dim); }
+.log li::before { font-weight: 700; width: 1em; flex: none; }
+.log li.ok::before { content: "✓"; color: var(--correct); }
+.log li.no::before { content: "–"; color: var(--pass); }
+.table { display: flex; flex-direction: column; gap: 6px; }
+.table .line { display: grid; grid-template-columns: 2ch 1fr auto; gap: 12px; align-items: center; padding: 10px 14px; background: var(--navy); border-radius: 10px; font-variant-numeric: tabular-nums; }
+.table .line.next { box-shadow: inset 0 0 0 2px var(--gold); }
+.table .pos { color: var(--chalk-dim); }
+.table .pts { font: 400 26px/1 var(--display); }
+.table .line.first .pts { color: var(--gold); }
+
+/* Full time */
+.finale { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 14px; background: var(--navy); }
+.fin-canvas { display: block; width: 100%; aspect-ratio: 16 / 9; max-width: 100%; border-radius: 10px; background: #f6f3ea; }
+.finale .dim { opacity: .38; }
+.finale blockquote, .fin-lose { transition: opacity .3s; }
+.fin-head { font: 400 clamp(40px, 11vw, 72px)/0.95 var(--display); text-transform: uppercase; color: var(--gold); text-wrap: balance; overflow-wrap: anywhere; }
+.finale blockquote { margin: 0; font: 400 clamp(24px, 6vw, 34px)/1.1 var(--display); text-transform: uppercase; color: var(--chalk); text-wrap: balance; }
+.finale blockquote::before { content: "\201C"; color: var(--gold); }
+.finale blockquote::after { content: "\201D"; color: var(--gold); }
+.fin-lose { display: flex; flex-direction: column; gap: 4px; padding-top: 10px; border-top: 2px solid var(--navy-line); }
+.fin-lose blockquote { font-size: clamp(20px, 5vw, 26px); color: var(--chalk-dim); }
+.fin-head.lost { color: var(--chalk-dim); }
+.step-in { animation: step-in .45s ease-out both; }
+@keyframes step-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .step-in { animation: none; } }
+.fin-canvas { cursor: pointer; }
+.fin-clock { font: 400 18px/1 var(--display); color: var(--chalk-dim); font-variant-numeric: tabular-nums; }
+
+.demo-all { display: flex; flex-direction: column; gap: 10px; }
+.demo-lines { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px; }
+.demo-lines button { text-align: left; padding: 10px 12px; border-radius: 8px; background: var(--navy); font-size: 16px; }
+.demo-lines button:hover { box-shadow: inset 0 0 0 2px var(--gold); }
+#seg-margin button { padding: 0 11px; }
+
+.toast { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  background: var(--chalk); color: var(--navy-deep); padding: 10px 16px; border-radius: 10px; font-size: 15px; max-width: calc(100% - 32px); z-index: 5; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<!-- Home: pick a category -->
+<section class="screen" id="home">
+  <div>
+    <div class="wordmark">Head's <span>Gone!</span></div>
+  </div>
+  <p class="lede">Stick the phone on your forehead. Your mates describe the player. Tilt down when you get it, tilt up to pass.</p>
+  <div class="strip" id="game-strip" hidden>
+    <span id="strip-text"></span>
+    <button class="btn small ghost" id="strip-end">End game</button>
+  </div>
+  <div class="row">
+    <button class="btn small ghost" id="open-setup">Players &amp; timer</button>
+    <span class="hint" id="setup-summary"></span>
+    <button class="btn small ghost" id="open-demo">Preview full time</button>
+  </div>
+  <div class="eyebrow">Pick a category</div>
+  <div class="grid" id="grid"></div>
+</section>
+
+<!-- Setup -->
+<section class="screen" id="setup" hidden>
+  <h2>Players &amp; timer</h2>
+  <div class="field">
+    <span class="label">Who's playing? Players or teams take turns.</span>
+    <div class="players" id="player-list"></div>
+    <div><button class="btn small ghost" id="add-player">Add player</button></div>
+  </div>
+  <div class="field">
+    <span class="label">Time per turn</span>
+    <div class="seg" id="seg-time"></div>
+  </div>
+  <div class="field">
+    <span class="label">Turns each</span>
+    <div class="seg" id="seg-rounds"></div>
+  </div>
+  <div class="row"><button class="btn" id="setup-done">Done</button></div>
+</section>
+
+<!-- Ready: pass the phone -->
+<section class="screen ready" id="ready" hidden>
+  <div class="eyebrow" id="ready-meta"></div>
+  <div class="who" id="ready-who"></div>
+  <p class="lede">Hold the phone to your forehead, screen facing your mates.</p>
+  <div class="howto">
+    <div class="down"><b>Tilt down</b>Got it</div>
+    <div class="up"><b>Tilt up</b>Pass</div>
+  </div>
+  <div class="row" style="justify-content:center">
+    <button class="btn" id="go">Start</button>
+    <button class="btn ghost" id="ready-back">Change category</button>
+  </div>
+  <p class="hint" id="ready-note"></p>
+</section>
+
+<!-- Play -->
+<section class="screen" id="play" hidden>
+  <div class="hud">
+    <span class="clock" id="clock">60</span>
+    <button class="quit" id="quit">Stop</button>
+    <span id="hud-score">0</span>
+  </div>
+  <div class="card">
+    <div>
+      <div class="card-tag" id="card-tag" hidden></div>
+      <div class="card-name" id="card-name"></div>
+    </div>
+  </div>
+  <div class="taps" id="taps">
+    <button class="p" id="tap-pass">Pass</button>
+    <button class="c" id="tap-correct">Got it</button>
+  </div>
+</section>
+
+<!-- Full-time preview: try each margin without playing -->
+<section class="screen" id="demo" hidden>
+  <h2>Full-time preview</h2>
+  <p class="hint">Matt plays Sam. Pick a margin to see a random winner and loser line acted out, or tap any line below to watch its scene.</p>
+  <div class="seg" id="seg-margin"></div>
+  <div id="demo-slot"></div>
+  <div class="row">
+    <button class="btn" id="demo-again">Another line</button>
+    <button class="btn ghost" id="demo-back">Back</button>
+  </div>
+  <div class="demo-all" id="demo-all"></div>
+</section>
+
+<!-- Turn results -->
+<section class="screen" id="results" hidden>
+  <div class="finale" id="finale" hidden>
+    <canvas class="fin-canvas" id="fin-canvas" aria-hidden="true"></canvas>
+    <span class="fin-clock" id="fin-clock"></span>
+    <div class="fin-head" id="fin-head"></div>
+    <blockquote id="fin-win"></blockquote>
+    <div class="fin-lose" id="fin-lose">
+      <span class="label" id="fin-lose-who"></span>
+      <blockquote id="fin-lose-q"></blockquote>
+    </div>
+  </div>
+  <div class="eyebrow" id="res-meta"></div>
+  <div class="row" style="align-items:flex-end; gap:16px">
+    <div class="big-score" id="res-score">0</div>
+    <h2 id="res-title"></h2>
+  </div>
+  <ul class="log" id="res-log"></ul>
+  <div class="eyebrow">Table</div>
+  <div class="table" id="res-table"></div>
+  <div class="row">
+    <button class="btn" id="res-next"></button>
+    <button class="btn ghost" id="res-cat">Change category</button>
+  </div>
+</section>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="categories.js"></script>
+<script src="wikidata-categories.js"></script>
+<script src="verdicts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"></script>
+<script src="scenes.js"></script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const CATS = [...(window.CATEGORIES || []), ...(window.WIKIDATA_CATEGORIES || [])];
+  const MIX = { id: "mix", name: "Mixed Bag", blurb: "Anyone from any category",
+    players: [...new Set(CATS.flatMap((c) => c.players))] };
+  const ALL = [MIX, ...CATS];
+  const TIMES = [30, 60, 90];
+  const ROUNDS = [1, 2, 3, 5];
+
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("whoareya:" + k); return v ? JSON.parse(v) : d; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem("whoareya:" + k, JSON.stringify(v)); } catch {} },
+  };
+
+  const settings = store.get("settings", { names: ["Player 1", "Player 2"], seconds: 60, rounds: 1 });
+  let game = null;        // { players:[{name,score}], turn, totalTurns, category, decks:{} }
+
+  // ---------- screens ----------
+  function show(id) {
+    for (const s of document.querySelectorAll(".screen")) s.hidden = s.id !== id;
+    if (id !== "results" && id !== "demo") window.Sketch?.stop();
+  }
+  function toast(msg) {
+    const t = $("toast"); t.textContent = msg; t.hidden = false;
+    clearTimeout(toast.t); toast.t = setTimeout(() => (t.hidden = true), 3200);
+  }
+
+  // ---------- home ----------
+  function renderHome() {
+    const grid = $("grid"); grid.textContent = "";
+    ALL.forEach((c, i) => {
+      const b = document.createElement("button");
+      b.className = "sticker" + (c.id === "mix" ? " mix" : "");
+      b.innerHTML = `<span class="no"></span><span class="name"></span><span class="blurb"></span><span class="count"></span>`;
+      b.querySelector(".no").textContent = String(i + 1).padStart(2, "0");
+      b.querySelector(".name").textContent = c.name;
+      b.querySelector(".blurb").textContent = c.blurb;
+      b.querySelector(".count").textContent = `${c.players.length} players`;
+      b.onclick = () => pickCategory(c);
+      grid.append(b);
+    });
+    $("setup-summary").textContent =
+      `${settings.names.length} player${settings.names.length > 1 ? "s" : ""} · ${settings.seconds}s · ${settings.rounds} turn${settings.rounds > 1 ? "s" : ""} each`;
+    $("game-strip").hidden = !game;
+    if (game) $("strip-text").innerHTML = `Game on. <b></b> is up next.`, $("strip-text").querySelector("b").textContent = current().name;
+    show("home");
+  }
+  $("strip-end").onclick = () => { game = null; renderHome(); };
+
+  function pickCategory(cat) {
+    if (!game) {
+      game = {
+        players: settings.names.map((n, i) => ({ name: n.trim() || `Player ${i + 1}`, score: 0 })),
+        turn: 0, totalTurns: settings.names.length * settings.rounds, decks: {},
+      };
+    }
+    game.category = cat;
+    renderReady();
+  }
+  const current = () => game.players[game.turn % game.players.length];
+
+  // ---------- setup ----------
+  function renderSetup() {
+    const list = $("player-list"); list.textContent = "";
+    settings.names.forEach((n, i) => {
+      const row = document.createElement("div"); row.className = "player-row";
+      const input = document.createElement("input");
+      input.id = "player-" + i; input.value = n; input.maxLength = 24; input.placeholder = `Player ${i + 1}`;
+      input.setAttribute("aria-label", `Player ${i + 1} name`);
+      input.oninput = () => { settings.names[i] = input.value; };
+      const del = document.createElement("button");
+      del.textContent = "×"; del.setAttribute("aria-label", `Remove ${n || "player"}`);
+      del.disabled = settings.names.length <= 1;
+      del.onclick = () => { settings.names.splice(i, 1); renderSetup(); };
+      row.append(input, del); list.append(row);
+    });
+    seg($("seg-time"), TIMES, settings.seconds, (v) => `${v}s`, (v) => { settings.seconds = v; renderSetup(); });
+    seg($("seg-rounds"), ROUNDS, settings.rounds, String, (v) => { settings.rounds = v; renderSetup(); });
+    show("setup");
+  }
+  function seg(el, values, cur, label, onPick) {
+    el.textContent = "";
+    for (const v of values) {
+      const b = document.createElement("button");
+      b.textContent = label(v); b.setAttribute("aria-pressed", v === cur);
+      b.onclick = () => onPick(v); el.append(b);
+    }
+  }
+  $("open-setup").onclick = renderSetup;
+  $("add-player").onclick = () => {
+    if (settings.names.length >= 12) return;
+    settings.names.push(`Player ${settings.names.length + 1}`); renderSetup();
+    $("player-" + (settings.names.length - 1)).select();
+  };
+  $("setup-done").onclick = () => {
+    settings.names = settings.names.map((n, i) => n.trim() || `Player ${i + 1}`);
+    store.set("settings", settings);
+    game = null;            // new line-up means a fresh game
+    renderHome();
+  };
+
+  // ---------- ready ----------
+  function renderReady() {
+    const round = Math.floor(game.turn / game.players.length) + 1;
+    const rounds = game.totalTurns / game.players.length;
+    $("ready-meta").textContent = `${game.category.name}${rounds > 1 ? ` · Round ${round} of ${rounds}` : ""}`;
+    $("ready-who").textContent = game.players.length > 1 ? `${current().name}'s turn` : "Your turn";
+    $("ready-note").textContent = tilt.status === "off"
+      ? "Tilt isn't available here, so use the Pass and Got it buttons, or the up and down arrow keys."
+      : "";
+    show("ready");
+  }
+  $("ready-back").onclick = renderHome;
+  $("go").onclick = async () => { unlockAudio(); await tilt.enable(); wake(); startTurn(); };
+
+  // ---------- deck ----------
+  function draw() {
+    const id = game.category.id;
+    let deck = game.decks[id];
+    if (!deck || !deck.length) {
+      deck = game.decks[id] = shuffle([...game.category.players]);
+    }
+    return deck.pop();
+  }
+  function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  }
+
+  // ---------- turn ----------
+  let turn = null;
+  function startTurn() {
+    turn = { log: [], score: 0, card: null, phase: "countdown", ends: 0, raf: 0, locked: false };
+    show("play");
+    $("play").className = "screen";
+    $("hud-score").textContent = "0";
+    $("clock").textContent = settings.seconds;
+    $("clock").classList.remove("low");
+    $("taps").hidden = true;
+    let n = 3;
+    const step = () => {
+      if (!turn || turn.phase !== "countdown") return;
+      if (n > 0) { setCard(String(n), "Get ready"); beep(520, 0.12); n--; turn.cd = setTimeout(step, 800); }
+      else { beep(880, 0.25); beginClock(); }
+    };
+    step();
+  }
+  function beginClock() {
+    turn.phase = "live";
+    turn.ends = performance.now() + settings.seconds * 1000;
+    turn.armed = false;              // wait for the phone to come back upright before the first tilt counts
+    $("taps").hidden = false;
+    nextCard();
+    let lastSec = settings.seconds;
+    const tick = () => {
+      if (!turn || turn.phase === "done") return;
+      const left = Math.max(0, Math.ceil((turn.ends - performance.now()) / 1000));
+      if (left !== lastSec) {
+        lastSec = left;
+        $("clock").textContent = left;
+        $("clock").classList.toggle("low", left <= 5);
+        if (left <= 5 && left > 0) beep(660, 0.08);
+      }
+      if (left <= 0) return timeUp();
+      turn.raf = requestAnimationFrame(tick);
+    };
+    turn.raf = requestAnimationFrame(tick);
+  }
+  function setCard(name, tag) {
+    $("card-name").textContent = name;
+    $("card-tag").textContent = tag || ""; $("card-tag").hidden = !tag;
+    fitName();
+  }
+  function nextCard() { turn.card = draw(); setCard(turn.card); }
+
+  function answer(correct) {
+    if (!turn || turn.phase !== "live" || turn.locked) return;
+    turn.locked = true;
+    turn.log.push({ name: turn.card, ok: correct });
+    if (correct) { turn.score++; $("hud-score").textContent = turn.score; }
+    $("play").className = "screen " + (correct ? "correct" : "pass");
+    setCard(correct ? "Correct!" : "Pass", turn.card);
+    correct ? chime() : buzz();
+    try { navigator.vibrate?.(correct ? 60 : [30, 40, 30]); } catch {}
+    setTimeout(() => {
+      if (!turn || turn.phase !== "live") return;
+      $("play").className = "screen";
+      turn.locked = false;
+      nextCard();
+    }, 700);
+  }
+  function timeUp() {
+    turn.phase = "done";
+    if (turn.card && !turn.locked) turn.log.push({ name: turn.card, ok: false });
+    $("play").className = "screen over";
+    $("taps").hidden = true;
+    setCard("Time's up!");
+    final();
+    setTimeout(showResults, 1400);
+  }
+  function stopTurn() {
+    if (!turn) return;
+    clearTimeout(turn.cd); cancelAnimationFrame(turn.raf);
+    turn = null; release(); renderReady();
+  }
+  $("tap-correct").onclick = () => answer(true);
+  $("tap-pass").onclick = () => answer(false);
+  $("quit").onclick = stopTurn;
+  document.addEventListener("keydown", (e) => {
+    if ($("play").hidden) return;
+    if (e.key === "ArrowDown" || e.key === " ") { e.preventDefault(); answer(true); }
+    if (e.key === "ArrowUp") { e.preventDefault(); answer(false); }
+    if (e.key === "Escape") stopTurn();
+  });
+
+  // Shrink the name until it fits the card.
+  function fitName() {
+    const el = $("card-name"), box = el.parentElement.parentElement;
+    let size = Math.min(window.innerWidth * 0.16, window.innerHeight * 0.3, 150);
+    el.style.fontSize = size + "px";
+    const maxH = box.clientHeight - 16, maxW = box.clientWidth - 48;
+    while (size > 24 && (el.scrollWidth > maxW || el.parentElement.offsetHeight > maxH)) {
+      size -= 4; el.style.fontSize = size + "px";
+    }
+  }
+  window.addEventListener("resize", () => { if (!$("play").hidden) fitName(); });
+
+  // ---------- results ----------
+  function showResults() {
+    const p = current();
+    p.score += turn.score;
+    const log = turn.log; turn = null; release();
+    game.turn++;
+    const finished = game.turn >= game.totalTurns;
+
+    $("res-meta").textContent = `${p.name} · ${game.category.name}`;
+    $("res-score").textContent = log.filter((l) => l.ok).length;
+    $("res-title").textContent = log.some((l) => l.ok) ? "Correct" : "Nil. Unlucky.";
+    const ul = $("res-log"); ul.textContent = "";
+    for (const l of log) { const li = document.createElement("li"); li.className = l.ok ? "ok" : "no"; li.textContent = l.name; ul.append(li); }
+
+    const order = [...game.players].sort((a, b) => b.score - a.score);
+    const tb = $("res-table"); tb.textContent = "";
+    order.forEach((pl, i) => {
+      const d = document.createElement("div");
+      d.className = "line" + (i === 0 && pl.score > 0 ? " first" : "") + (!finished && pl === current() ? " next" : "");
+      d.innerHTML = `<span class="pos"></span><span class="n"></span><span class="pts"></span>`;
+      d.querySelector(".pos").textContent = i + 1;
+      d.querySelector(".n").textContent = pl.name + (!finished && pl === current() ? " · up next" : "");
+      d.querySelector(".pts").textContent = pl.score;
+      tb.append(d);
+    });
+
+    if (finished) {
+      $("results").prepend($("finale"));
+      fullTime(order);
+      $("res-next").textContent = "Play again";
+      $("res-next").onclick = () => { game.players.forEach((x) => (x.score = 0)); game.turn = 0; renderReady(); };
+      $("res-cat").textContent = "New game";
+      $("res-cat").onclick = () => { game = null; renderHome(); };
+    } else {
+      $("finale").hidden = true;
+      $("res-next").textContent = `${current().name}, you're up`;
+      $("res-next").onclick = renderReady;
+      $("res-cat").textContent = "Change category";
+      $("res-cat").onclick = renderHome;
+    }
+    show("results");
+  }
+
+  // ---------- full time ----------
+  const V = window.VERDICTS;
+  const WORDS = ["nil","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve",
+    "thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen","twenty"];
+  const tier = (m) => (m >= 7 ? 3 : m >= 4 ? 2 : m >= 2 ? 1 : 0);
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
+
+  function fullTime(order, force) {
+    const fin = $("finale");
+    window.Sketch?.stop();
+    if (order.length < 2 || !V) { fin.hidden = true; return; }
+    fin.hidden = false;
+    const [top, second] = order, last = order[order.length - 1];
+    const margin = top.score - second.score, lostBy = top.score - last.score;
+    const info = { w: top.name, l: second.name, ws: top.score, ls: second.score, wsWord: WORDS[top.score] || top.score };
+    const ceefax = `${info.w} ${info.ws} (${info.wsWord}) ${info.l} ${info.ls}`;
+    const fill = (line, loser) => line.replace("{ceefax}", ceefax).replaceAll("{w}", top.name).replaceAll("{l}", loser.name);
+    const kits = shuffle([...(window.Sketch?.kits || [{}])]);
+    const base = { win: kits[0], lose: kits[1] || kits[0], info };
+    const items = [];
+    if (margin === 0) {
+      const d = force?.win || pick(V.draw);
+      items.push({ ...base, scene: d[1], clock: "Full time", head: "It's a draw", line: d[0] });
+    } else {
+      const t = tier(margin);
+      const w = force?.win || (force ? null : pick(V.win[t]));
+      const l = force?.lose || (force ? null : pick(V.lose[tier(lostBy)]));
+      // Loser first, then the winner, so it ends on a high.
+      if (l) items.push({ ...base, info: { ...info, l: last.name, ls: last.score }, scene: l[1], clock: "Full time",
+        head: order.length > 2 ? `Bottom: ${last.name}` : `${last.name} lost by ${lostBy}`, line: fill(l[0], last), lose: true });
+      if (w) items.push({ ...base, scene: w[1], clock: t === 0 ? "90+4'" : "Full time", head: `${top.name} wins by ${margin}`, line: fill(w[0], second) });
+    }
+    const showStep = (it) => {
+      $("fin-clock").textContent = it.clock;
+      $("fin-head").textContent = it.head;
+      $("fin-head").classList.toggle("lost", !!it.lose);
+      $("fin-win").textContent = it.line;
+      for (const el of [$("fin-head"), $("fin-win")]) { el.classList.remove("step-in"); void el.offsetWidth; el.classList.add("step-in"); }
+    };
+    $("fin-win").hidden = false; $("fin-lose").hidden = true;
+    showStep(items[items.length - 1]);
+    if (!window.Sketch) return;
+    const run = () => window.Sketch.play($("fin-canvas"), items, (i) => { showStep(items[i]); if (i === items.length - 1) chime(); }, { once: true });
+    $("fin-canvas").onclick = run;
+    run();
+  }
+
+  // ---------- full-time preview ----------
+  const MARGINS = [["Draw", 0], ["By 1", 1], ["By 2-3", 3], ["By 4-6", 5], ["By 7+", 9]];
+  let demoMargin = 1;
+  function renderDemo(force) {
+    unlockAudio();
+    show("demo");
+    $("demo-slot").append($("finale"));
+    seg($("seg-margin"), MARGINS.map((m) => m[1]), demoMargin,
+      (v) => MARGINS.find((m) => m[1] === v)[0], (v) => { demoMargin = v; renderDemo(); });
+    fullTime([{ name: "Matt", score: 2 + demoMargin }, { name: "Sam", score: 2 }], force);
+    const groups = demoMargin === 0 ? [["Draw lines", V.draw, "win"]]
+      : [["Winner lines", V.win[tier(demoMargin)], "win"], ["Loser lines", V.lose[tier(demoMargin)], "lose"]];
+    const box = $("demo-all"); box.textContent = "";
+    for (const [title, lines, side] of groups) {
+      const h = document.createElement("div"); h.className = "eyebrow"; h.textContent = title; box.append(h);
+      const list = document.createElement("div"); list.className = "demo-lines";
+      for (const entry of lines) {
+        const b = document.createElement("button");
+        b.textContent = entry[0] === "{ceefax}" ? "Ceefax scoreline, e.g. Matt 9 (nine) Sam 1" : entry[0].replaceAll("{w}", "Matt").replaceAll("{l}", "Sam");
+        b.onclick = () => { renderDemo({ [side]: entry }); $("demo").scrollTop = 0; };
+        list.append(b);
+      }
+      box.append(list);
+    }
+  }
+  $("open-demo").onclick = () => { if (location.hash === "#fulltime") renderDemo(); else location.hash = "fulltime"; };
+  $("demo-again").onclick = () => renderDemo();
+  $("demo-back").onclick = () => { history.replaceState(null, "", location.pathname + location.search); renderHome(); };
+  const route = () => { if (location.hash === "#fulltime") renderDemo(); };
+  window.addEventListener("hashchange", route);
+
+  // ---------- tilt ----------
+  // v is the vertical part of the screen's facing direction: about 0 when the phone is
+  // upright on a forehead (either orientation), negative when the screen tips toward
+  // the floor (nod down = got it), positive when it tips to the ceiling (head back = pass).
+  const tilt = {
+    status: "unknown", // unknown | on | off
+    seen: false,
+    async enable() {
+      if (this.status !== "unknown") return;
+      const DOE = window.DeviceOrientationEvent;
+      if (!DOE) { this.status = "off"; return; }
+      try {
+        if (typeof DOE.requestPermission === "function") {
+          const r = await DOE.requestPermission();
+          if (r !== "granted") { this.status = "off"; toast("Motion access was declined. Use the buttons instead."); return; }
+        }
+      } catch { this.status = "off"; return; }
+      window.addEventListener("deviceorientation", onOrient);
+      this.status = "on";
+      setTimeout(() => {
+        if (!this.seen) { this.status = "off"; toast("No tilt sensor found here. Use the Pass and Got it buttons."); }
+      }, 2500);
+    },
+  };
+  function onOrient(e) {
+    if (e.beta == null || e.gamma == null) return;
+    tilt.seen = true;
+    if (!turn || turn.phase !== "live" || turn.locked) return;
+    const r = Math.PI / 180;
+    const v = Math.cos(e.beta * r) * Math.cos(e.gamma * r);
+    if (Math.abs(v) < 0.3) { turn.armed = true; return; }
+    if (!turn.armed) return;
+    if (v < -0.55) { turn.armed = false; answer(true); }
+    else if (v > 0.55) { turn.armed = false; answer(false); }
+  }
+
+  // ---------- screen awake ----------
+  let lock = null;
+  async function wake() { try { lock = await navigator.wakeLock?.request("screen"); } catch {} }
+  function release() { try { lock?.release(); } catch {} lock = null; }
+
+  // ---------- sound ----------
+  let ac = null;
+  function unlockAudio() {
+    try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); ac.resume(); } catch {}
+  }
+  function beep(freq, dur, type = "sine", when = 0, vol = 0.2) {
+    if (!ac) return;
+    const t = ac.currentTime + when, o = ac.createOscillator(), g = ac.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dur);
+  }
+  const chime = () => { beep(784, 0.15); beep(1175, 0.25, "sine", 0.1); };
+  const buzz = () => beep(150, 0.3, "square", 0, 0.12);
+  const final = () => { beep(523, 0.2, "triangle"); beep(392, 0.2, "triangle", 0.2); beep(262, 0.5, "triangle", 0.4); };
+
+  renderHome();
+  route();
+})();
+</script>
+
+</body></html>
