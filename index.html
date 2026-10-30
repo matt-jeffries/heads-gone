@@ -1,5 +1,16 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0c1a42">
+<meta name="description" content="The football forehead guessing game. Tilt down when you get it, tilt up to pass.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Head's Gone">
+</head><body>
 <title>Head's Gone!</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -414,7 +425,9 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     show("ready");
   }
   $("ready-back").onclick = renderHome;
-  $("go").onclick = async () => { unlockAudio(); await tilt.enable(); wake(); startTurn(); };
+  // Go full screen for the round where the browser allows it (Android; iPhone needs Add to Home Screen).
+  const fullscreen = () => { try { if (!document.fullscreenElement && !matchMedia("(display-mode: standalone), (display-mode: fullscreen)").matches) document.documentElement.requestFullscreen?.({ navigationUI: "hide" })?.catch(() => {}); } catch {} };
+  $("go").onclick = async () => { fullscreen(); unlockAudio(); await tilt.enable(); wake(); startTurn(); };
 
   // ---------- deck ----------
   function draw() {
@@ -703,7 +716,8 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dur);
   }
   const chime = () => { beep(784, 0.15); beep(1175, 0.25, "sine", 0.1); };
-  const buzz = () => beep(150, 0.3, "square", 0, 0.12);
+  // A soft falling "uh-oh" for a pass: high enough for phone speakers, gentle enough not to grate.
+  const buzz = () => { beep(494, 0.14, "triangle", 0, 0.16); beep(370, 0.26, "triangle", 0.12, 0.16); };
   const final = () => { beep(523, 0.2, "triangle"); beep(392, 0.2, "triangle", 0.2); beep(262, 0.5, "triangle", 0.4); };
 
   renderHome();
