@@ -75,6 +75,8 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 .sticker .name { font: 400 24px/1.02 var(--display); text-transform: uppercase; color: var(--chalk); padding-right: 28px; text-wrap: balance; }
 .sticker .blurb { font-size: 14px; color: var(--chalk-dim); font-weight: 500; }
 .sticker .count { margin-top: auto; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); }
+.sticker.locked { opacity: 0.6; border-style: dashed; }
+.sticker.locked .count { color: var(--chalk-dim); }
 .sticker.mix { background: var(--gold); border-color: var(--gold); }
 .sticker.mix .name, .sticker.mix .count, .sticker.mix .no { color: var(--navy-deep); }
 .sticker.mix .blurb { color: var(--navy); }
@@ -297,9 +299,14 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 (() => {
   const $ = (id) => document.getElementById(id);
   const CATS = [...(window.CATEGORIES || []), ...(window.WIKIDATA_CATEGORIES || [])];
-  const MIX = { id: "mix", name: "Mixed Bag", blurb: "Anyone from any category",
-    players: [...new Set(CATS.flatMap((c) => c.players))] };
-  const ALL = [MIX, ...CATS];
+  // Ten packs are free (Mixed Bag plus the nine marked free); the rest are Pro packs.
+  // ?unlock in the URL opens everything, for testing.
+  const UNLOCKED = new URLSearchParams(location.search).has("unlock");
+  const FREE = CATS.filter((c) => c.free), PRO = CATS.filter((c) => !c.free);
+  const MIX = { id: "mix", free: true, name: "Mixed Bag", blurb: "Anyone from the free packs",
+    players: [...new Set(FREE.flatMap((c) => c.players))] };
+  const ALL = [MIX, ...FREE, ...PRO];
+  const isOpen = (c) => c.free || UNLOCKED;
   const TIMES = [30, 60, 90];
   const ROUNDS = [1, 2, 3, 5];
 
@@ -326,13 +333,13 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     const grid = $("grid"); grid.textContent = "";
     ALL.forEach((c, i) => {
       const b = document.createElement("button");
-      b.className = "sticker" + (c.id === "mix" ? " mix" : "");
+      b.className = "sticker" + (c.id === "mix" ? " mix" : "") + (isOpen(c) ? "" : " locked");
       b.innerHTML = `<span class="no"></span><span class="name"></span><span class="blurb"></span><span class="count"></span>`;
       b.querySelector(".no").textContent = String(i + 1).padStart(2, "0");
       b.querySelector(".name").textContent = c.name;
       b.querySelector(".blurb").textContent = c.blurb;
-      b.querySelector(".count").textContent = `${c.players.length} players`;
-      b.onclick = () => pickCategory(c);
+      b.querySelector(".count").textContent = isOpen(c) ? `${c.players.length} players` : `Pro pack · ${c.players.length} players`;
+      b.onclick = () => isOpen(c) ? pickCategory(c) : toast(`${c.name} is a Pro pack. Unlocking Pro packs is coming soon.`);
       grid.append(b);
     });
     $("setup-summary").textContent =
