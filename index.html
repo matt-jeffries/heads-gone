@@ -310,7 +310,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 (() => {
   const $ = (id) => document.getElementById(id);
   const CATS = [...(window.CATEGORIES || []), ...(window.WIKIDATA_CATEGORIES || [])];
-  // Ten packs are free (Mixed Bag plus the nine marked free); the rest are Pro packs.
+  // Mixed Bag and the packs marked free are open to everyone; the rest are Pro packs.
   // ?unlock in the URL opens everything, for testing.
   const UNLOCKED = new URLSearchParams(location.search).has("unlock");
   const FREE = CATS.filter((c) => c.free), PRO = CATS.filter((c) => !c.free);
