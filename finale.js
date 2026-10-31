@@ -1,6 +1,6 @@
 // Full-time animation: one flat cartoon scene per result, the same every game; only the
 // text around it changes. Win: the boot strikes the ball into the net and the goal turns
-// into a trophy. Lose: the ball clangs off the post and a rain cloud rolls in.
+// into a trophy. Lose: the ball clangs off the post, then the whistle goes for GAME OVER.
 // Finale.play(host, [{ mood: "win" | "lose" | "draw" }], onItem, { once }) plays each in turn.
 (() => {
   const NAVY = "#140f5c";
@@ -67,6 +67,18 @@
     <path ${O} d="M188 242 h24 l6 34 h-36z" fill="#fdd116"/>
     <rect ${O} x="160" y="276" width="80" height="36" rx="6" fill="#9c6a4a"/>
     <rect x="178" y="287" width="44" height="12" rx="3" fill="#f5c244"/>`;
+  // A referee's whistle side on: mouthpiece to the left, round chamber, ring and lanyard.
+  const whistle = () => `
+    <path d="M284 262 q24 36 -4 90" stroke="${NAVY}" stroke-width="12" fill="none" stroke-linecap="round"/>
+    <path d="M284 262 q24 36 -4 90" stroke="#e8524a" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <circle cx="276" cy="248" r="14" fill="none" stroke="${NAVY}" stroke-width="12"/><circle cx="276" cy="248" r="14" fill="none" stroke="#cfd6e3" stroke-width="5"/>
+    <path ${O} d="M104 160 h110 v42 h-110 q-8 0 -8 -8 v-26 q0 -8 8 -8z" fill="#dfe4ee"/>
+    <path d="M104 192 h108 v8 h-108z" fill="#aeb6c7"/>
+    <circle ${O} cx="232" cy="200" r="54" fill="#dfe4ee"/>
+    <path d="M182 214 a54 54 0 0 0 100 0 a60 44 0 0 1 -100 0z" fill="#aeb6c7"/>
+    <path d="M200 170 q12 -16 34 -18" stroke="#fff" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <rect ${O} x="190" y="150" width="34" height="14" rx="3" fill="${NAVY}" stroke-width="4"/>
+    <path d="M110 168 h60" stroke="#fff" stroke-width="5" stroke-linecap="round"/>`;
   const cloud = () => `
     <g class="rain" stroke="#4aa3df" stroke-width="6" stroke-linecap="round">
       <path d="M14 62 l-6 14"/><path d="M38 62 l-6 14"/><path d="M62 62 l-6 14"/><path d="M86 62 l-6 14"/>
@@ -116,12 +128,19 @@
         <circle data-k="bg" cx="200" cy="185" r="128" fill="${p.bg}"/>
         ${win ? SPARKLES.map((s, i) => `<g data-k="sp${i}">${sparkle(s[2], s[3])}</g>`).join("") : ""}
         ${win ? CONFETTI.map((c, i) => `<rect data-k="cf${i}" x="-6" y="-3" width="12" height="6" rx="2" fill="${c.col}"/>`).join("") : ""}
-        ${win ? "" : `<g data-k="cloud">${cloud()}</g>`}
-        <ellipse cx="200" cy="318" rx="170" ry="9" fill="#b9bad8"/>
+        ${win ? `<ellipse cx="200" cy="318" rx="170" ry="9" fill="#b9bad8"/>
         <path d="M60 312 H340" stroke="${NAVY}" stroke-width="7" stroke-linecap="round"/>
-        ${win ? `<g data-k="trophy">${trophy()}</g>` : ""}
+        <g data-k="trophy">${trophy()}</g>
         <g data-k="boot">${boot(p)}</g>
-        <g data-k="hball">${ball(p, uid + "h")}</g>
+        <g data-k="hball">${ball(p, uid + "h")}</g>` : `
+        <g data-k="blast" stroke="${NAVY}" stroke-width="6" stroke-linecap="round" fill="none">
+          <path d="M206 132 l-8 -20"/><path d="M222 128 l0 -24"/><path d="M238 132 l8 -20"/><path d="M252 142 l16 -14"/>
+        </g>
+        <g data-k="whistle">${whistle()}</g>
+        <g data-k="gameover" font-family="Anton, Impact, sans-serif" font-size="58" text-anchor="middle" letter-spacing="1">
+          <text x="200" y="104" fill="none" stroke="${NAVY}" stroke-width="12" stroke-linejoin="round">GAME OVER</text>
+          <text x="200" y="104" fill="#ffffff">GAME OVER</text>
+        </g>`}
       </g>
     </svg>`;
   }
@@ -198,8 +217,8 @@
     const h = t - CUT - 0.35;
     set("bg", `translate(200 185) scale(${t < CUT + 0.7 ? lerp(290, 128, shrink) / 128 : 1}) translate(-200 -185)`);
     const slide = (k) => (1 - easeOut(k)) * 90;
-    set("boot", `translate(${46 - slide(seg(h, 0.25, 0.7))} 244)`);
     if (win) {
+      set("boot", `translate(${46 - slide(seg(h, 0.25, 0.7))} 244)`);
       set("hball", `translate(${298 + slide(seg(h, 0.35, 0.8))} 268) rotate(${-slide(seg(h, 0.35, 0.8)) * 2})`);
       const g = back(seg(h, 0.1, 0.6)), idle = h > 0.7 ? Math.sin((h - 0.7) * 2.4) * 0.025 : 0, tilt = h > 0.7 ? Math.sin((h - 0.7) * 1.7) * 2.5 : 0;
       set("trophy", `translate(200 312) rotate(${tilt}) scale(${g * (1 + idle)}) translate(-200 -312)`);
@@ -210,13 +229,18 @@
       CONFETTI.forEach((c, i) => { const ph = h - 0.3 - c.d, cyc = 2.6 / c.sp, k = ph < 0 ? -1 : (ph % cyc) / cyc;
         set(`cf${i}`, k < 0 ? "translate(-50 -50)" : `translate(${c.x + Math.sin(ph * 3 + i) * 10} ${lerp(30, 330, k)}) rotate(${c.r + ph * 220})`); });
     } else {
-      // the ball sits glum in the middle, a little squashed, as the cloud rolls in
-      set("hball", `translate(${232 + slide(seg(h, 0.35, 0.8))} ${276 + 4} ) scale(1 0.88)`);
-      const k = mood === "draw" ? 0 : easeOut(seg(h, 0.4, 1));
-      els.cloud.style.display = mood === "draw" ? "none" : "";
-      set("cloud", `translate(${lerp(170, 140, k)} ${lerp(-80, 80, k) + (h > 1 ? Math.sin((h - 1) * 1.6) * 3 : 0)})`);
-      els.rainLines.forEach((l, i) => { const ph = h - 0.9 - i * 0.18, k2 = ph < 0 ? -1 : (ph % 0.7) / 0.7;
-        l.setAttribute("transform", k2 < 0 ? "translate(0 -200)" : `translate(${-k2 * 6} ${k2 * 34})`); l.setAttribute("opacity", k2 < 0 ? "0" : String(1 - k2)); });
+      // The whistle pops in and is blown: it buzzes, blast lines fly off the slot, and
+      // GAME OVER stamps down. It blows again every few seconds.
+      const pop = back(seg(h, 0.05, 0.45));
+      const cyc = h < 0.6 ? -1 : (h - 0.6) % 2.8, blowing = cyc >= 0 && cyc < 0.9;
+      const buzz = blowing ? Math.sin(h * 90) * 1.6 : 0, puff = blowing ? Math.sin(Math.min(1, cyc / 0.9) * Math.PI) * 0.04 : 0;
+      set("whistle", `translate(${buzz} ${-buzz * 0.5}) translate(200 200) rotate(${(1 - pop) * -25}) scale(${pop * (1 + puff)}) translate(-200 -200)`);
+      const bk = blowing ? (cyc % 0.3) / 0.3 : 0;
+      set("blast", `translate(222 140) scale(${0.8 + bk * 0.5}) translate(-222 -140) translate(0 ${-bk * 10})`);
+      els.blast.setAttribute("opacity", blowing ? String(1 - bk * 0.7) : "0");
+      const st = seg(h, 0.7, 0.95);
+      set("gameover", `translate(200 90) scale(${st <= 0 ? 0 : lerp(1.6, 1, easeOut(st))}) rotate(${-4 * st}) translate(-200 -90)`);
+      els.gameover.setAttribute("opacity", String(st > 0 ? Math.min(1, st * 2) : 0));
     }
   }
 
