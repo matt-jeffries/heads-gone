@@ -159,7 +159,8 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 
 /* Full time */
 .finale { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 14px; background: var(--navy); }
-.fin-canvas { display: block; width: 100%; aspect-ratio: 16 / 9; max-width: 100%; border-radius: 10px; background: #f6f3ea; }
+.fin-art { display: block; width: 100%; aspect-ratio: 400 / 310; border-radius: 10px; background: #f8f7f4; overflow: hidden; cursor: pointer; }
+.fin-art svg { display: block; width: 100%; height: 100%; }
 .finale .dim { opacity: .38; }
 .finale blockquote, .fin-lose { transition: opacity .3s; }
 .fin-head { font: 400 clamp(40px, 11vw, 72px)/0.95 var(--display); text-transform: uppercase; color: var(--gold); text-wrap: balance; overflow-wrap: anywhere; }
@@ -172,7 +173,6 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 .step-in { animation: step-in .45s ease-out both; }
 @keyframes step-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .step-in { animation: none; } }
-.fin-canvas { cursor: pointer; }
 .fin-clock { font: 400 18px/1 var(--display); color: var(--chalk-dim); font-variant-numeric: tabular-nums; }
 
 .demo-all { display: flex; flex-direction: column; gap: 10px; }
@@ -263,7 +263,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 <!-- Full-time preview: try each margin without playing -->
 <section class="screen" id="demo" hidden>
   <h2>Full-time preview</h2>
-  <p class="hint">Matt plays Sam. Pick a margin to see a random winner and loser line acted out, or tap any line below to watch its scene.</p>
+  <p class="hint">Matt plays Sam. Pick a margin to see a random winner and loser line played out, or tap any line below to see it on the full-time screen.</p>
   <div class="seg" id="seg-margin"></div>
   <div id="demo-slot"></div>
   <div class="row">
@@ -276,7 +276,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 <!-- Turn results -->
 <section class="screen" id="results" hidden>
   <div class="finale" id="finale" hidden>
-    <canvas class="fin-canvas" id="fin-canvas" aria-hidden="true"></canvas>
+    <div class="fin-art" id="fin-art" aria-hidden="true"></div>
     <span class="fin-clock" id="fin-clock"></span>
     <div class="fin-head" id="fin-head"></div>
     <blockquote id="fin-win"></blockquote>
@@ -304,8 +304,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 <script src="categories.js"></script>
 <script src="wikidata-categories.js"></script>
 <script src="verdicts.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"></script>
-<script src="scenes.js"></script>
+<script src="finale.js"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -332,7 +331,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   // ---------- screens ----------
   function show(id) {
     for (const s of document.querySelectorAll(".screen")) s.hidden = s.id !== id;
-    if (id !== "results" && id !== "demo") window.Sketch?.stop();
+    if (id !== "results" && id !== "demo") window.Finale?.stop();
   }
   function toast(msg) {
     const t = $("toast"); t.textContent = msg; t.hidden = false;
@@ -593,7 +592,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 
   function fullTime(order, force) {
     const fin = $("finale");
-    window.Sketch?.stop();
+    window.Finale?.stop();
     if (order.length < 2 || !V) { fin.hidden = true; return; }
     fin.hidden = false;
     const [top, second] = order, last = order[order.length - 1];
@@ -601,20 +600,19 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     const info = { w: top.name, l: second.name, ws: top.score, ls: second.score, wsWord: WORDS[top.score] || top.score };
     const ceefax = `${info.w} ${info.ws} (${info.wsWord}) ${info.l} ${info.ls}`;
     const fill = (line, loser) => line.replace("{ceefax}", ceefax).replaceAll("{w}", top.name).replaceAll("{l}", loser.name);
-    const kits = shuffle([...(window.Sketch?.kits || [{}])]);
-    const base = { win: kits[0], lose: kits[1] || kits[0], info };
+    const base = { info };
     const items = [];
     if (margin === 0) {
       const d = force?.win || pick(V.draw);
-      items.push({ ...base, scene: d[1], clock: "Full time", head: "It's a draw", line: d[0] });
+      items.push({ ...base, mood: "draw", clock: "Full time", head: "It's a draw", line: d[0] });
     } else {
       const t = tier(margin);
       const w = force?.win || (force ? null : pick(V.win[t]));
       const l = force?.lose || (force ? null : pick(V.lose[tier(lostBy)]));
       // Loser first, then the winner, so it ends on a high.
-      if (l) items.push({ ...base, info: { ...info, l: last.name, ls: last.score }, scene: l[1], clock: "Full time",
+      if (l) items.push({ ...base, info: { ...info, l: last.name, ls: last.score }, mood: "lose", clock: "Full time",
         head: order.length > 2 ? `Bottom: ${last.name}` : `${last.name} lost by ${lostBy}`, line: fill(l[0], last), lose: true });
-      if (w) items.push({ ...base, scene: w[1], clock: t === 0 ? "90+4'" : "Full time", head: `${top.name} wins by ${margin}`, line: fill(w[0], second) });
+      if (w) items.push({ ...base, mood: "win", clock: t === 0 ? "90+4'" : "Full time", head: `${top.name} wins by ${margin}`, line: fill(w[0], second) });
     }
     const showStep = (it) => {
       $("fin-clock").textContent = it.clock;
@@ -625,9 +623,9 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     };
     $("fin-win").hidden = false; $("fin-lose").hidden = true;
     showStep(items[items.length - 1]);
-    if (!window.Sketch) return;
-    const run = () => window.Sketch.play($("fin-canvas"), items, (i) => { showStep(items[i]); if (i === items.length - 1) chime(); }, { once: true });
-    $("fin-canvas").onclick = run;
+    if (!window.Finale) return;
+    const run = () => window.Finale.play($("fin-art"), items, (i) => { showStep(items[i]); if (i === items.length - 1) chime(); }, { once: true });
+    $("fin-art").onclick = run;
     run();
   }
 
