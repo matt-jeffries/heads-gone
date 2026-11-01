@@ -1,5 +1,5 @@
 // Full-time animations: mounts the design handoff's GoalAnimation / GameOverAnimation
-// (football-animations.js, a React island) and plays one per result in turn.
+// (football-animations.js, a React island) and plays one per result in turn, looping forever.
 // Same API as the old finale.js: Finale.play(host, [{ mood: "win" | "lose" | "draw" }], onItem, { once })
 (function () {
   const HOLD = 1.6; // seconds the final title stays up before the next result
@@ -25,8 +25,8 @@
       root.render(React.createElement(Comp, {
         key: my + ":" + i,
         onComplete: () => {
-          if (my !== token || i >= items.length - 1) return;
-          timer = setTimeout(() => step(i + 1), HOLD * 1000);
+          if (my !== token) return;
+          timer = setTimeout(() => step((i + 1) % items.length), HOLD * 1000);
         },
       }));
     };

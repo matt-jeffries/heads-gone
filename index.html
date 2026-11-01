@@ -626,7 +626,8 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     $("fin-win").hidden = false; $("fin-lose").hidden = true;
     showStep(items[items.length - 1]);
     if (!window.Finale) return;
-    const run = () => window.Finale.play($("fin-art"), items, (i) => { showStep(items[i]); if (i === items.length - 1) chime(); }, { once: true });
+    let chimed = false;
+    const run = () => { chimed = false; window.Finale.play($("fin-art"), items, (i) => { showStep(items[i]); if (i === items.length - 1 && !chimed) { chimed = true; chime(); } }); };
     $("fin-art").onclick = run;
     run();
   }
