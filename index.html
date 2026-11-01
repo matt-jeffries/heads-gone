@@ -194,6 +194,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   <p class="lede">Stick the phone on your forehead. Your mates describe the player. Tilt down when you get it, tilt up to pass.</p>
   <div class="strip" id="game-strip" hidden>
     <span id="strip-text"></span>
+    <button class="btn small" id="strip-resume" hidden>Carry on</button>
     <button class="btn small ghost" id="strip-end">End game</button>
   </div>
   <div class="row">
@@ -357,12 +358,15 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     $("setup-summary").textContent =
       `${settings.names.length} player${settings.names.length > 1 ? "s" : ""} · ${settings.seconds}s · ${settings.rounds} turn${settings.rounds > 1 ? "s" : ""} each`;
     $("game-strip").hidden = !game;
+    $("strip-resume").hidden = !(game && game.turn > 0);
     if (game) $("strip-text").innerHTML = `Game on. <b></b> is up next.`, $("strip-text").querySelector("b").textContent = current().name;
     show("home");
   }
   $("strip-end").onclick = () => { game = null; renderHome(); };
+  $("strip-resume").onclick = () => renderReady();
 
   function pickCategory(cat) {
+    if (game && game.turn > 0) game = null;   // the category is fixed once turns start, so a new pick is a new game
     if (!game) {
       game = {
         players: settings.names.map((n, i) => ({ name: n.trim() || `Player ${i + 1}`, score: 0 })),
@@ -420,6 +424,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     const rounds = game.totalTurns / game.players.length;
     $("ready-meta").textContent = `${game.category.name}${rounds > 1 ? ` · Round ${round} of ${rounds}` : ""}`;
     $("ready-who").textContent = game.players.length > 1 ? `${current().name}'s turn` : "Your turn";
+    $("ready-back").hidden = game.turn > 0;   // no switching category midway through the turns
     $("ready-note").textContent = tilt.status === "off"
       ? "Tilt isn't available here, so use the Pass and Got it buttons, or the up and down arrow keys."
       : "";
@@ -573,14 +578,14 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
       fullTime(order);
       $("res-next").textContent = "Play again";
       $("res-next").onclick = () => { game.players.forEach((x) => (x.score = 0)); game.turn = 0; renderReady(); };
+      $("res-cat").hidden = false;
       $("res-cat").textContent = "New game";
       $("res-cat").onclick = () => { game = null; renderHome(); };
     } else {
       $("finale").hidden = true;
       $("res-next").textContent = `${current().name}, you're up`;
       $("res-next").onclick = renderReady;
-      $("res-cat").textContent = "Change category";
-      $("res-cat").onclick = renderHome;
+      $("res-cat").hidden = true;
     }
     show("results");
   }
