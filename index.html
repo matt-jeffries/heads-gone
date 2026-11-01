@@ -159,8 +159,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 
 /* Full time */
 .finale { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 14px; background: var(--navy); }
-.fin-art { display: block; width: 100%; aspect-ratio: 400 / 310; border-radius: 10px; background: #f8f7f4; overflow: hidden; cursor: pointer; }
-.fin-art svg { display: block; width: 100%; height: 100%; }
+.fin-art { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; background: #0e3a3b; overflow: hidden; cursor: pointer; }
 .finale .dim { opacity: .38; }
 .finale blockquote, .fin-lose { transition: opacity .3s; }
 .fin-head { font: 400 clamp(40px, 11vw, 72px)/0.95 var(--display); text-transform: uppercase; color: var(--gold); text-wrap: balance; overflow-wrap: anywhere; }
@@ -304,7 +303,10 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 <script src="categories.js"></script>
 <script src="wikidata-categories.js"></script>
 <script src="verdicts.js"></script>
-<script src="finale.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="football-animations.js"></script>
+<script src="finale-react.js"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
