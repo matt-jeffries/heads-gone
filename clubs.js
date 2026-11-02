@@ -8,42 +8,42 @@ window.LEAGUES = [
 ];
 window.POPULAR_CLUBS = ["manutd", "liverpool", "arsenal", "chelsea", "mancity", "lilywhites", "magpies", "everton", "villa", "hammers", "leeds", "celtic", "rangers", "realmadrid", "barca"];
 window.CLUBS = `
-arsenal|eng1|Gunners|North London|sleeves|#db0007|#f6f6f2
+arsenal|eng1|Gunners|Islington|sleeves|#db0007|#f6f6f2
 villa|eng1|Villans|Birmingham|sleeves|#670e36|#95bfe5
 bournemouth|eng1|Cherries|Bournemouth|stripes|#da291c|#151515
 brentford|eng1|Bees|Brentford|stripes|#e30613|#f6f6f2
 brighton|eng1|Seagulls|Brighton|stripes|#0057b8|#f6f6f2
 burnley|eng1|Clarets|Burnley|sleeves|#6c1d45|#99d6ea
-chelsea|eng1|Blues|West London|trim|#034694|#f6f6f2
-eagles|eng1|Eagles|South London|stripes|#1b458f|#c4122e
-everton|eng1|Toffees|Merseyside|trim|#003399|#f6f6f2
-fulham|eng1|Cottagers|West London|trim|#f6f6f2|#151515
+chelsea|eng1|Blues|Chelsea|trim|#034694|#f6f6f2
+eagles|eng1|Eagles|Croydon|stripes|#1b458f|#c4122e
+everton|eng1|Toffees|Liverpool|trim|#003399|#f6f6f2
+fulham|eng1|Cottagers|Fulham|trim|#f6f6f2|#151515
 leeds|eng1|Peacocks|Leeds|trim|#f6f6f2|#1d428a
-liverpool|eng1|Reds|Merseyside|trim|#c8102e|#f6f6f2
+liverpool|eng1|Reds|Liverpool|trim|#c8102e|#f6f6f2
 mancity|eng1|Citizens|Manchester|trim|#6cabdd|#f6f6f2
 manutd|eng1|Red Devils|Manchester|trim|#da291c|#151515
-magpies|eng1|Magpies|Tyneside|stripes|#151515|#f6f6f2
+magpies|eng1|Magpies|Newcastle|stripes|#151515|#f6f6f2
 forest|eng1|Tricky Trees|Nottingham|trim|#dd0000|#f6f6f2
-blackcats|eng1|Black Cats|Wearside|stripes|#d2232a|#f6f6f2
-lilywhites|eng1|Lilywhites|North London|trim|#f6f6f2|#132257
-hammers|eng1|Hammers|East London|sleeves|#7a263a|#5fb8e6
+blackcats|eng1|Black Cats|Sunderland|stripes|#d2232a|#f6f6f2
+lilywhites|eng1|Lilywhites|Tottenham|trim|#f6f6f2|#132257
+hammers|eng1|Hammers|West Ham|sleeves|#7a263a|#5fb8e6
 wolves|eng1|Wolves|Wolverhampton|trim|#fdb913|#151515
 birmingham|eng2|Blues|Birmingham|trim|#0000ff|#f6f6f2
 blackburn|eng2|Rovers|Blackburn|halves|#009ee0|#f6f6f2
 bristolcity|eng2|Robins|Bristol|trim|#e21a23|#f6f6f2
-charlton|eng2|Addicks|South-east London|trim|#d4021d|#f6f6f2
+charlton|eng2|Addicks|Charlton|trim|#d4021d|#f6f6f2
 coventry|eng2|Sky Blues|Coventry|trim|#59cbe8|#f6f6f2
 derby|eng2|Rams|Derby|trim|#f6f6f2|#151515
 hull|eng2|Tigers|Hull|stripes|#f5a12d|#151515
 ipswich|eng2|Tractor Boys|Ipswich|trim|#0044a9|#f6f6f2
 leicester|eng2|Foxes|Leicester|trim|#003090|#fdbe11
-boro|eng2|Boro|Teesside|trim|#e11b22|#f6f6f2
-millwall|eng2|Lions|South-east London|trim|#001d5e|#f6f6f2
+boro|eng2|Boro|Middlesbrough|trim|#e11b22|#f6f6f2
+millwall|eng2|Lions|Bermondsey|trim|#001d5e|#f6f6f2
 norwich|eng2|Canaries|Norwich|trim|#fff200|#00a650
 oxford|eng2|U's|Oxford|trim|#ffd700|#001e62
 portsmouth|eng2|Pompey|Portsmouth|trim|#001489|#f6f6f2
 preston|eng2|Lilywhites|Preston|trim|#f6f6f2|#001d5e
-qpr|eng2|Hoops|West London|hoops|#005cab|#f6f6f2
+qpr|eng2|Hoops|Shepherd's Bush|hoops|#005cab|#f6f6f2
 sheffutd|eng2|Blades|Sheffield|stripes|#ee2737|#f6f6f2
 sheffwed|eng2|Owls|Sheffield|stripes|#0e00f7|#f6f6f2
 southampton|eng2|Saints|Southampton|stripes|#d71920|#f6f6f2
@@ -61,7 +61,7 @@ cardiff|eng3|Bluebirds|Cardiff|trim|#0070b5|#f6f6f2
 doncaster|eng3|Rovers|Doncaster|hoops|#ed1c24|#f6f6f2
 exeter|eng3|Grecians|Exeter|stripes|#d71920|#f6f6f2
 huddersfield|eng3|Terriers|Huddersfield|stripes|#0e63ad|#f6f6f2
-orient|eng3|O's|East London|trim|#e2231a|#f6f6f2
+orient|eng3|O's|Leyton|trim|#e2231a|#f6f6f2
 lincoln|eng3|Imps|Lincoln|stripes|#e30613|#f6f6f2
 luton|eng3|Hatters|Luton|trim|#f78f1e|#002d62
 mansfield|eng3|Stags|Mansfield|trim|#f5a12d|#1d428a

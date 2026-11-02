@@ -124,6 +124,8 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 .pack .kit { height: 72px; border-radius: 12px; max-width: 420px; width: 100%; box-shadow: inset 0 0 0 2px rgba(255,255,255,.08); }
 .sticker .no { display: none; position: absolute; top: 54px; right: 12px; font: 400 15px/1 var(--display); color: var(--chalk-dim); font-variant-numeric: tabular-nums; }
 .sticker .name { font: 400 24px/1.02 var(--display); text-transform: uppercase; color: var(--chalk); text-wrap: balance; }
+.sticker .place { font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin-bottom: -4px; }
+.sticker.locked .place { color: var(--chalk-dim); }
 .sticker .blurb { font-size: 14px; color: var(--chalk-dim); font-weight: 500; }
 .sticker .count { margin-top: auto; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); }
 .sticker.locked { opacity: 0.6; border-style: dashed; }
@@ -304,7 +306,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 <!-- Buy a pack -->
 <section class="screen pack" id="buy" hidden>
   <div class="kit" id="buy-kit" aria-hidden="true"></div>
-  <div class="eyebrow">Locked pack</div>
+  <div class="eyebrow" id="buy-place">Locked pack</div>
   <h2 class="pack-name" id="buy-name"></h2>
   <p class="pack-blurb" id="buy-blurb"></p>
   <div class="buy-options">
@@ -501,10 +503,12 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     const sticker = (c, i) => {
       const b = document.createElement("button");
       b.className = "sticker" + (c.id === "mix" ? " mix hero" : "") + (isOpen(c) ? "" : " locked") + (c.id === myClub ? " mine" : "");
-      b.innerHTML = `<span class="no"></span><span class="name"></span><span class="blurb"></span><span class="count"></span>`;
+      const club = c.shelf === "clubs" ? clubById(c.id) : null;
+      b.innerHTML = `<span class="no"></span>${club ? `<span class="place"></span>` : ""}<span class="name"></span><span class="blurb"></span><span class="count"></span>`;
       b.querySelector(".no").textContent = String(i + 1).padStart(2, "0");
       b.prepend(kitEl(c.kit));
       b.querySelector(".name").textContent = c.name;
+      if (club) b.querySelector(".place").textContent = club.place;
       b.querySelector(".blurb").textContent = c.blurb;
       b.querySelector(".count").textContent = c.id === myClub ? `Your club · ${c.players.length} players`
         : isOpen(c) ? `${c.players.length} players` : `${PRICE_ONE} · ${c.players.length} players`;
@@ -529,7 +533,8 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
       const mine = clubById(myClub);
       if (id === "clubs" && mine && !CATS.some((p) => p.id === mine.id)) {
         const b = document.createElement("button"); b.className = "sticker mine";
-        b.innerHTML = `<span class="name"></span><span class="blurb"></span><span class="count">Your club · coming soon</span>`;
+        b.innerHTML = `<span class="place"></span><span class="name"></span><span class="blurb"></span><span class="count">Your club · coming soon</span>`;
+        b.querySelector(".place").textContent = mine.place;
         b.prepend(kitEl(mine.kit));
         b.querySelector(".name").textContent = mine.nick; b.querySelector(".blurb").textContent = `Heroes of ${mine.place}`;
         b.onclick = () => toast(`We're building the ${mine.nick} pack. It'll be free for you when it lands.`);
@@ -603,6 +608,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     buying = c;
     paintKit($("buy-kit"), c.kit);
     $("buy-name").textContent = c.name;
+    $("buy-place").textContent = clubById(c.id)?.place || "Locked pack";
     $("buy-blurb").textContent = `${c.blurb} · ${c.players.length} players`;
     $("buy-one").textContent = `Buy this pack · ${PRICE_ONE}`;
     $("buy-all").hidden = c.shelf !== "clubs";
@@ -637,7 +643,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   }
   function renderPack() {
     const c = game.category;
-    $("pack-no").textContent = c.id === "mix" ? "Mixed Bag" : "Pack";
+    $("pack-no").textContent = c.id === "mix" ? "Mixed Bag" : clubById(c.id)?.place || "Pack";
     $("pack-name").textContent = c.name;
     $("pack-blurb").textContent = c.blurb;
     paintKit($("pack-kit"), c.kit);
