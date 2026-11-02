@@ -253,6 +253,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     <button class="btn small ghost" id="open-demo">Preview full time</button>
   </div>
   <div id="shelves"></div>
+  <p class="hint"><a href="privacy.html" style="color:inherit">Privacy policy</a></p>
 </section>
 
 <!-- Setup -->
@@ -291,8 +292,8 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 <!-- Pick your club: its pack is free -->
 <section class="screen" id="club" hidden>
   <div class="wordmark">Head's <span>Gone!</span></div>
-  <h2>Who do you support?</h2>
-  <p class="lede">Pick your club and its pack is yours, free. You can only pick once.</p>
+  <h2 id="club-title">Who do you support?</h2>
+  <p class="lede" id="club-lede">Pick your club and its pack is yours, free. You can only pick once.</p>
   <input class="club-search" id="club-search" type="search" placeholder="Search by place or nickname" autocomplete="off">
   <div class="chips" id="club-chips"></div>
   <div class="club-list" id="club-grid"></div>
@@ -402,6 +403,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 
 <script src="categories.js"></script>
 <script src="clubs.js"></script>
+<script src="club-packs.js"></script>
 <script src="wikidata-categories.js"></script>
 <script src="verdicts.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
@@ -412,6 +414,14 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 (() => {
   const $ = (id) => document.getElementById(id);
   const CATS = [...(window.CATEGORIES || []), ...(window.WIKIDATA_CATEGORIES || [])];
+  // Club packs built from Wikidata (club-packs.js) for every club without a hand-made pack.
+  const NO_THE = /^(The |Los |La |Le |Les |Die |Il |L'|Boro$|Pompey$|Posh$|Killie$|Livi$|Well$|Wolves$|Spireites$|Stanley$)/;
+  for (const club of window.CLUBS || []) {
+    const list = window.CLUB_PACK_PLAYERS?.[club.id];
+    if (!list || CATS.some((c) => c.id === club.id)) continue;
+    CATS.push({ id: club.id, shelf: "clubs", kit: club.kit, name: (NO_THE.test(club.nick) ? "" : "The ") + club.nick,
+      blurb: `Heroes of ${club.place}`, players: list });
+  }
   // Mixed Bag and the packs marked free are open to everyone; the rest are Pro packs.
   // ?unlock in the URL opens everything, for testing.
   const UNLOCKED = new URLSearchParams(location.search).has("unlock");
@@ -519,14 +529,18 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     let n = 1;
     for (const [id, title] of SHELVES) {
       const rank = (c) => (c.id === myClub ? -1 : (POS_ORDER.indexOf(c.id) + 1) || 99);
-      const packs = ALL.filter((c) => c.shelf === id).sort((a, b) => isOpen(b) - isOpen(a) || rank(a) - rank(b));
+      const pop = (c) => { const i = (window.POPULAR_CLUBS || []).indexOf(c.id); return i < 0 ? 99 : i; };
+      let packs = ALL.filter((c) => c.shelf === id).sort((a, b) => isOpen(b) - isOpen(a) || rank(a) - rank(b) || (id === "clubs" ? pop(a) - pop(b) : 0));
+      const total = packs.length;
+      if (id === "clubs") packs = packs.slice(0, 12);
       if (!packs.length) continue;
       const sec = document.createElement("section"); sec.className = "shelf" + (openShelves.has(id) ? " open" : "");
       const head = document.createElement("div"); head.className = "shelf-head";
       const h = document.createElement("h3"); h.textContent = title;
       const more = document.createElement("button");
-      const label = () => (more.textContent = sec.classList.contains("open") ? "Show less" : `See all ${packs.length}`);
-      more.onclick = () => { sec.classList.toggle("open"); openShelves[sec.classList.contains("open") ? "add" : "delete"](id); label(); };
+      const label = () => (more.textContent = sec.classList.contains("open") ? "Show less" : `See all ${total}`);
+      more.onclick = id === "clubs" ? () => renderClub("browse")
+        : () => { sec.classList.toggle("open"); openShelves[sec.classList.contains("open") ? "add" : "delete"](id); label(); };
       label();
       head.append(h, more);
       const row = document.createElement("div"); row.className = "shelf-row";
@@ -546,7 +560,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
         const cta = document.createElement("div"); cta.className = "club-cta";
         cta.innerHTML = `<span class="hint">Your own club's pack is free.</span>`;
         const go = document.createElement("button"); go.className = "btn small"; go.textContent = "Pick your club";
-        go.onclick = renderClub; cta.append(go); sec.insertBefore(cta, row);
+        go.onclick = () => renderClub("pick"); cta.append(go); sec.insertBefore(cta, row);
       }
     }
     $("setup-summary").textContent =
@@ -559,12 +573,18 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   $("strip-end").onclick = () => { game = null; renderHome(); };
 
   // ---------- pick your club ----------
-  let clubTab = "popular", clubPick = null;
-  function renderClub() {
+  let clubTab = "popular", clubPick = null, clubMode = "pick";
+  function renderClub(mode = "pick") {
+    clubMode = mode;
+    const browse = mode === "browse";
+    $("club-title").textContent = browse ? "All clubs" : "Who do you support?";
+    $("club-lede").textContent = browse ? "Every club pack. Your own club is free." : "Pick your club and its pack is yours, free. You can only pick once.";
+    $("club-skip").textContent = browse ? "Back" : "Skip for now";
+    clubPick = null;
     const chips = $("club-chips"); chips.textContent = "";
     for (const [id, label] of [["popular", "Most popular"], ...(window.LEAGUES || [])]) {
       const b = document.createElement("button"); b.textContent = label; b.setAttribute("aria-pressed", id === clubTab);
-      b.onclick = () => { clubTab = id; $("club-search").value = ""; renderClub(); };
+      b.onclick = () => { clubTab = id; $("club-search").value = ""; renderClub(clubMode); };
       chips.append(b);
     }
     renderClubList();
@@ -584,8 +604,14 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
       b.prepend(kitEl(c.kit));
       b.querySelector("b").textContent = c.nick;
       b.querySelector(".t span").textContent = c.place + (q || clubTab === "popular" ? ` · ${leagueName[c.league]}` : "");
-      b.querySelector(".tag").textContent = CATS.some((p) => p.id === c.id) ? "Pack ready" : "";
-      b.onclick = () => { clubPick = c.id; renderClubList(); };
+      const pack = CATS.find((p) => p.id === c.id);
+      if (clubMode === "browse") {
+        b.querySelector(".tag").textContent = !pack ? "Soon" : c.id === myClub ? "Your club" : isOpen(pack) ? "Open" : PRICE_ONE;
+        b.onclick = () => !pack ? toast(`The ${c.nick} pack is coming soon.`) : isOpen(pack) ? pickCategory(pack) : renderBuy(pack);
+      } else {
+        b.querySelector(".tag").textContent = pack ? "Pack ready" : "";
+        b.onclick = () => { clubPick = c.id; renderClubList(); };
+      }
       g.append(b);
     }
     const pick = clubById(clubPick);
@@ -599,7 +625,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     toast(CATS.some((p) => p.id === c.id) ? `${c.nick} pack unlocked. Enjoy.` : `Nice. The ${c.nick} pack is on its way, and it'll be free for you when it lands.`);
     renderHome();
   };
-  $("club-skip").onclick = () => { myClub = "none"; store.set("myclub", myClub); renderHome(); };
+  $("club-skip").onclick = () => { if (clubMode === "pick") { myClub = "none"; store.set("myclub", myClub); } renderHome(); };
 
   // ---------- buy ----------
   // Payments aren't live yet: the buttons explain that, and a discount code unlocks everything.
@@ -1033,7 +1059,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   const buzz = () => { beep(494, 0.14, "triangle", 0, 0.16); beep(370, 0.26, "triangle", 0.12, 0.16); };
   const final = () => { beep(523, 0.2, "triangle"); beep(392, 0.2, "triangle", 0.2); beep(262, 0.5, "triangle", 0.4); };
 
-  myClub ? renderHome() : renderClub();
+  myClub ? renderHome() : renderClub("pick");
   route();
 })();
 </script>
