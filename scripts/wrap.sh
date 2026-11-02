@@ -18,4 +18,10 @@ cat <<'HEAD'
 </head><body>
 HEAD
 cat "$1"
-printf '\n</body></html>\n'
+cat <<'TAIL'
+<script>
+  // Offline support (sw.js). Skipped when opened as a local file.
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body></html>
+TAIL

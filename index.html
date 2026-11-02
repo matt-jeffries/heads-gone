@@ -406,8 +406,8 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 <script src="club-packs.js"></script>
 <script src="wikidata-categories.js"></script>
 <script src="verdicts.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="vendor/react-18.3.1.min.js"></script>
+<script src="vendor/react-dom-18.3.1.min.js"></script>
 <script src="football-animations.js"></script>
 <script src="finale-react.js"></script>
 <script>
@@ -1063,5 +1063,8 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   route();
 })();
 </script>
-
+<script>
+  // Offline support (sw.js). Skipped when opened as a local file.
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
 </body></html>
