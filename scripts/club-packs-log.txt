@@ -1,0 +1,180 @@
+arsenal: Q9617 50 players
+villa: Q18711 50 players
+bournemouth: Q19568 50 players
+brentford: Q19571 50 players
+brighton: Q19453 50 players
+burnley: Q19458 50 players
+chelsea: Q9616 50 players
+eagles: Q19467 48 players
+everton: Q5794 50 players
+fulham: Q18708 50 players
+leeds: Q1128631 50 players
+liverpool: Q1130849 50 players
+mancity: Q50602 50 players
+manutd: Q18656 49 players
+magpies: Q18716 50 players
+forest: Q19490 50 players
+blackcats: Q18739 50 players
+lilywhites: Q18741 50 players
+hammers: Q18747 50 players
+wolves: Q19500 50 players
+birmingham: Q19444 50 players
+blackburn: Q19446 50 players
+bristolcity: Q19456 50 players
+charlton: Q19462 50 players
+coventry: Q19580 50 players
+derby: Q19470 49 players
+hull: Q19477 49 players
+ipswich: Q9653 49 players
+leicester: Q19481 49 players
+boro: Q18661 50 players
+millwall: Unexpected token 'Y', "You are ma"... is not valid JSON
+norwich: Unexpected token 'Y', "You are ma"... is not valid JSON
+oxford: Unexpected token 'Y', "You are ma"... is not valid JSON
+portsmouth: Unexpected token 'Y', "You are ma"... is not valid JSON
+preston: Unexpected token 'Y', "You are ma"... is not valid JSON
+qpr: Unexpected token 'Y', "You are ma"... is not valid JSON
+sheffutd: Unexpected token 'Y', "You are ma"... is not valid JSON
+sheffwed: Unexpected token 'Y', "You are ma"... is not valid JSON
+southampton: Unexpected token 'Y', "You are ma"... is not valid JSON
+stoke: Unexpected token 'Y', "You are ma"... is not valid JSON
+swansea: Unexpected token 'Y', "You are ma"... is not valid JSON
+watford: Unexpected token 'Y', "You are ma"... is not valid JSON
+westbrom: Unexpected token 'Y', "You are ma"... is not valid JSON
+wrexham: Unexpected token 'Y', "You are ma"... is not valid JSON
+barnsley: Q19442 49 players
+blackpool: Q19449 50 players
+bolton: Q19451 50 players
+bradford: Q48879 50 players
+burton: Q48929 50 players
+cardiff: Q18662 49 players
+doncaster: Q19589 50 players
+exeter: Q48939 50 players
+huddersfield: Q19473 50 players
+orient: Q19595 50 players
+lincoln: Q18519 50 players
+luton: Q18520 50 players
+mansfield: Q18522 50 players
+northampton: Q48945 50 players
+peterborough: Q19495 50 players
+plymouth: Q48947 49 players
+portvale: Q48948 50 players
+reading: Q18729 50 players
+rotherham: Q48950 49 players
+stevenage: Q9426 50 players
+stockport: Q18526 50 players
+wigan: Q18750 49 players
+wycombe: Q48953 50 players
+wimbledon: Q48851 50 players
+accrington: Q48843 50 players
+barnet: Q9408 50 players
+barrow: Q18507 50 players
+bristolrovers: Q48925 50 players
+bromley: Q1584552 50 players
+cambridge: Q18509 50 players
+cheltenham: Q48932 50 players
+spireites: Q48935 50 players
+colchester: Q19578 50 players
+crawley: Q19584 50 players
+crewe: Q19587 50 players
+fleetwood: Q48941 50 players
+gillingham: Q48943 50 players
+grimsby: Q18515 50 players
+harrogate: Q2219286 49 players
+mkdons: Q248188 50 players
+newport: Q18523 50 players
+nottscounty: Q19598 50 players
+oldham: Q19601 50 players
+salford: Q18460 50 players
+shrewsbury: Q19626 50 players
+swindon: Q19634 50 players
+tranmere: Q19637 50 players
+walsall: Q19644 50 players
+aberdeen: Q187326 50 players
+celtic: Q19593 50 players
+dundee: Q335483 50 players
+dundeeutd: Q192873 50 players
+falkirk: Q219241 50 players
+hearts: Q202093 50 players
+hibs: Q192597 50 players
+kilmarnock: Q210961 50 players
+livingston: Q867921 50 players
+motherwell: Q216523 50 players
+rangers: Q19597 50 players
+stmirren: Q319136 50 players
+alaves: Q223620 50 players
+athletic: Q8687 50 players
+atletico: Q8701 49 players
+barca: Q7156 50 players
+celta: Q8749 50 players
+elche: Unexpected token 'Y', "You are ma"... is not valid JSON
+espanyol: Unexpected token 'Y', "You are ma"... is not valid JSON
+getafe: Q8806 49 players
+girona: Q11945 50 players
+levante: Q8823 50 players
+mallorca: Q8835 50 players
+osasuna: Q10286 50 players
+rayo: Q10300 50 players
+betis: Q8723 49 players
+realmadrid: Q8682 49 players
+oviedo: Q271574 48 players
+realsociedad: Q10315 50 players
+sevilla: Unexpected token 'Y', "You are ma"... is not valid JSON
+valencia: Unexpected token 'Y', "You are ma"... is not valid JSON
+villarreal: Unexpected token 'Y', "You are ma"... is not valid JSON
+atalanta: Unexpected token 'Y', "You are ma"... is not valid JSON
+bologna: Unexpected token 'Y', "You are ma"... is not valid JSON
+cagliari: Unexpected token 'Y', "You are ma"... is not valid JSON
+como: Unexpected token 'Y', "You are ma"... is not valid JSON
+cremonese: Unexpected token 'Y', "You are ma"... is not valid JSON
+fiorentina: Unexpected token 'Y', "You are ma"... is not valid JSON
+genoa: Unexpected token 'Y', "You are ma"... is not valid JSON
+verona: Unexpected token 'Y', "You are ma"... is not valid JSON
+inter: Unexpected token 'Y', "You are ma"... is not valid JSON
+juve: Unexpected token 'Y', "You are ma"... is not valid JSON
+lazio: Unexpected token 'Y', "You are ma"... is not valid JSON
+lecce: Unexpected token 'Y', "You are ma"... is not valid JSON
+milan: Unexpected token 'Y', "You are ma"... is not valid JSON
+napoli: Unexpected token 'Y', "You are ma"... is not valid JSON
+parma: Q2693 50 players
+pisa: Q289613 50 players
+roma: Q2739 50 players
+sassuolo: Q8603 49 players
+torino: Q2768 49 players
+udinese: Q2798 48 players
+augsburg: Q15755 49 players
+leverkusen: Q104761 50 players
+bayern: Q15789 49 players
+dortmund: Q41420 49 players
+gladbach: Q101959 50 players
+frankfurt: Q38245 50 players
+freiburg: Q106394 50 players
+hamburg: Q51974 50 players
+heidenheim: Q162251 50 players
+hoffenheim: Q22707 50 players
+koln: Q104770 50 players
+mainz: Q105254 50 players
+leipzig: Q702455 48 players
+stpauli: Q6463 50 players
+stuttgart: Q4512 50 players
+union: Q141971 50 players
+werder: Q51976 50 players
+wolfsburg: Q101859 49 players
+angers: Q845137 50 players
+auxerre: Q182876 49 players
+brest: Unexpected token 'Y', "You are ma"... is not valid JSON
+lehavre: Unexpected token 'Y', "You are ma"... is not valid JSON
+lens: Unexpected token 'Y', "You are ma"... is not valid JSON
+lille: Unexpected token 'Y', "You are ma"... is not valid JSON
+lorient: Unexpected token 'Y', "You are ma"... is not valid JSON
+lyon: Unexpected token 'Y', "You are ma"... is not valid JSON
+marseille: Unexpected token 'Y', "You are ma"... is not valid JSON
+metz: Unexpected token 'Y', "You are ma"... is not valid JSON
+monaco: Unexpected token 'Y', "You are ma"... is not valid JSON
+nantes: Unexpected token 'Y', "You are ma"... is not valid JSON
+nice: Unexpected token 'Y', "You are ma"... is not valid JSON
+parisfc: Unexpected token 'Y', "You are ma"... is not valid JSON
+psg: Unexpected token 'Y', "You are ma"... is not valid JSON
+rennes: Unexpected token 'Y', "You are ma"... is not valid JSON
+strasbourg: Unexpected token 'Y', "You are ma"... is not valid JSON
+toulouse: Unexpected token 'Y', "You are ma"... is not valid JSON
