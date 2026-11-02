@@ -82,7 +82,9 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   transition: transform .12s ease, border-color .12s ease;
 }
 .sticker:hover, .sticker:focus-visible { border-color: var(--gold); transform: translateY(-2px); }
-.sticker .no { position: absolute; top: 10px; right: 12px; font: 400 15px/1 var(--display); color: var(--chalk-dim); font-variant-numeric: tabular-nums; }
+.sticker .kit { margin: -14px -14px 4px; height: 44px; flex: none; box-shadow: inset 0 -2px 0 rgba(0,0,0,.25); }
+.pack .kit { height: 72px; border-radius: 12px; max-width: 420px; width: 100%; box-shadow: inset 0 0 0 2px rgba(255,255,255,.08); }
+.sticker .no { position: absolute; top: 54px; right: 12px; font: 400 15px/1 var(--display); color: var(--chalk-dim); font-variant-numeric: tabular-nums; }
 .sticker .name { font: 400 24px/1.02 var(--display); text-transform: uppercase; color: var(--chalk); padding-right: 28px; text-wrap: balance; }
 .sticker .blurb { font-size: 14px; color: var(--chalk-dim); font-weight: 500; }
 .sticker .count { margin-top: auto; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); }
@@ -236,6 +238,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 
 <!-- Pack: details of the chosen category -->
 <section class="screen pack" id="pack" hidden>
+  <div class="kit" id="pack-kit" aria-hidden="true"></div>
   <div class="eyebrow" id="pack-no"></div>
   <h2 class="pack-name" id="pack-name"></h2>
   <p class="pack-blurb" id="pack-blurb"></p>
@@ -340,7 +343,26 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   const FREE = CATS.filter((c) => c.free), PRO = CATS.filter((c) => !c.free);
   const MIX = { id: "mix", free: true, name: "Mixed Bag", blurb: "Anyone from the free packs",
     players: [...new Set(FREE.flatMap((c) => c.players))] };
+  MIX.kit = ["multi", ...FREE.slice(0, 6).map((c) => c.kit?.[1]).filter(Boolean)];
   const ALL = [MIX, ...FREE, ...PRO];
+  // Kit swatch for a pack: club colours in a plain pattern (no badges or brands).
+  function kitBg(kit) {
+    if (!kit) return "var(--navy-line)";
+    const [style, a, b] = kit;
+    switch (style) {
+      case "stripes": return `repeating-linear-gradient(90deg, ${a} 0 14px, ${b} 14px 28px)`;
+      case "hoops": return `repeating-linear-gradient(180deg, ${a} 0 11px, ${b} 11px 22px)`;
+      case "halves": return `linear-gradient(90deg, ${a} 50%, ${b} 50%)`;
+      case "quarters": return `conic-gradient(from 90deg at 50% 50%, ${a} 0 25%, ${b} 0 50%, ${a} 0 75%, ${b} 0)`;
+      case "sash": return `linear-gradient(110deg, ${a} 0 42%, ${b} 42% 58%, ${a} 58%)`;
+      case "pinstripe": return `repeating-linear-gradient(90deg, ${a} 0 11px, ${b} 11px 13px)`;
+      case "trim": return `linear-gradient(180deg, ${a} 0 calc(100% - 9px), ${b} 0)`;
+      case "sleeves": return `linear-gradient(90deg, ${b} 0 20%, ${a} 20% 80%, ${b} 80%)`;
+      case "multi": { const cs = kit.slice(1), w = 100 / cs.length; return `linear-gradient(90deg, ${cs.map((c, i) => `${c} ${i * w}% ${(i + 1) * w}%`).join(", ")})`; }
+    }
+    return a;
+  }
+  const kitEl = (kit) => { const d = document.createElement("div"); d.className = "kit"; d.setAttribute("aria-hidden", "true"); d.style.background = kitBg(kit); return d; };
   const isOpen = (c) => c.free || UNLOCKED;
   const TIMES = [30, 60, 90];
   const ROUNDS = [1, 2, 3, 5];
@@ -378,6 +400,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
       b.className = "sticker" + (c.id === "mix" ? " mix" : "") + (isOpen(c) ? "" : " locked");
       b.innerHTML = `<span class="no"></span><span class="name"></span><span class="blurb"></span><span class="count"></span>`;
       b.querySelector(".no").textContent = String(i + 1).padStart(2, "0");
+      b.prepend(kitEl(c.kit));
       b.querySelector(".name").textContent = c.name;
       b.querySelector(".blurb").textContent = c.blurb;
       b.querySelector(".count").textContent = isOpen(c) ? `${c.players.length} players` : `Pro pack · ${c.players.length} players`;
@@ -410,6 +433,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     $("pack-no").textContent = c.id === "mix" ? "Mixed Bag" : "Pack";
     $("pack-name").textContent = c.name;
     $("pack-blurb").textContent = c.blurb;
+    $("pack-kit").style.background = kitBg(c.kit);
     const facts = [`${c.players.length} players`, `${settings.seconds}s a go`];
     if (!solo()) facts.push(`${game.players.length} taking turns`);
     $("pack-facts").textContent = "";
