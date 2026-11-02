@@ -97,6 +97,14 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 .shelf-row > * { scroll-snap-align: start; }
 .shelf.open .shelf-row { grid-auto-flow: row; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); grid-auto-columns: auto; overflow: visible; margin: 0; padding: 0; }
 .sticker.hero { min-height: 0; }
+.sticker.mine { border-color: var(--gold); }
+.sticker.mine .count { color: var(--gold); }
+.club-cta { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; border: 2px dashed var(--navy-line); }
+.buy-options { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 420px; }
+.buy-options .btn { width: 100%; }
+.code { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 420px; }
+.code-row { display: flex; gap: 8px; }
+.code-row input { flex: 1; min-width: 0; font: 600 18px var(--body); padding: 10px 12px; border-radius: 10px; border: 2px solid var(--navy-line); background: var(--navy); color: var(--chalk); }
 .sticker.hero .kit { height: 56px; }
 .pack .kit { height: 72px; border-radius: 12px; max-width: 420px; width: 100%; box-shadow: inset 0 0 0 2px rgba(255,255,255,.08); }
 .sticker .no { display: none; position: absolute; top: 54px; right: 12px; font: 400 15px/1 var(--display); color: var(--chalk-dim); font-variant-numeric: tabular-nums; }
@@ -263,6 +271,35 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   </div>
 </section>
 
+<!-- Pick your club: its pack is free -->
+<section class="screen" id="club" hidden>
+  <div class="wordmark">Head's <span>Gone!</span></div>
+  <h2>Who do you support?</h2>
+  <p class="lede">Pick your club and its pack is yours, free. You can only pick once.</p>
+  <div class="grid" id="club-grid"></div>
+  <div class="row"><button class="btn ghost" id="club-skip">My club isn't here yet</button></div>
+</section>
+
+<!-- Buy a pack -->
+<section class="screen pack" id="buy" hidden>
+  <div class="kit" id="buy-kit" aria-hidden="true"></div>
+  <div class="eyebrow">Locked pack</div>
+  <h2 class="pack-name" id="buy-name"></h2>
+  <p class="pack-blurb" id="buy-blurb"></p>
+  <div class="buy-options">
+    <button class="btn" id="buy-one"></button>
+    <button class="btn ghost" id="buy-all"></button>
+  </div>
+  <form class="code" id="buy-code">
+    <label class="label" for="code-input">Got a discount code?</label>
+    <div class="code-row">
+      <input id="code-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Enter code">
+      <button class="btn small" type="submit">Apply</button>
+    </div>
+  </form>
+  <div class="row"><button class="btn ghost small" id="buy-back">Back</button></div>
+</section>
+
 <!-- Ready: instructions, then wait for the phone to go on a forehead -->
 <section class="screen ready" id="ready" hidden>
   <div class="eyebrow" id="ready-meta"></div>
@@ -357,7 +394,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   const FREE = CATS.filter((c) => c.free), PRO = CATS.filter((c) => !c.free);
   const MIX = { id: "mix", free: true, name: "Mixed Bag", blurb: "Anyone from the free packs",
     players: [...new Set(FREE.flatMap((c) => c.players))] };
-  MIX.kit = ["mosaic", "magpies", "blackcats", "hammers", "eagles", "lilywhites", "spireites"];
+  MIX.kit = ["mosaic", "worldcup", "90s", "second", "cult", "gaffers", "hair"];
   // Position packs: a little pitch diagram, with a dot for where the player lives.
   const PITCH = {
     wing: `<line x1="0" y1="52" x2="220" y2="52"/><path d="M60 44 H124" class="r"/><circle cx="140" cy="44" r="6" class="d"/>`,
@@ -396,7 +433,11 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     return d;
   }
   const kitEl = (kit) => { const d = document.createElement("div"); d.setAttribute("aria-hidden", "true"); return paintKit(d, kit); };
-  const isOpen = (c) => c.free || UNLOCKED;
+  // Paid packs open if: free, ?unlock, your chosen club, bought, or the discount code was used.
+  const PRICE_ONE = "£0.99", PRICE_CLUBS = "£4.99";
+  const CODES = ["whoareya"];
+  const isOpen = (c) => c.free || UNLOCKED || c.id === myClub || owned.has("all") || owned.has(c.id) || (c.shelf === "clubs" && owned.has("allclubs"));
+  const CLUBS = CATS.filter((c) => c.shelf === "clubs");
   const TIMES = [30, 60, 90];
   const ROUNDS = [1, 2, 3, 5];
 
@@ -406,6 +447,8 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   };
 
   const settings = store.get("settings", { names: ["Player 1"], seconds: 60, rounds: 1 });
+  let myClub = store.get("myclub", null);           // pack id, or "none" if skipped
+  const owned = new Set(store.get("owned", []));     // pack ids, "allclubs" or "all"
   // One-off rounds are now the default: move people off the old two-player default once.
   if (!store.get("oneoff", false)) {
     if (settings.names.join() === "Player 1,Player 2") settings.names = ["Player 1"];
@@ -426,27 +469,28 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   }
 
   // ---------- home ----------
-  const SHELVES = [["clubs", "Clubs"], ["positions", "Positions"], ["icons", "Icons"], ["fun", "Just for fun"]];
+  const SHELVES = [["clubs", "Clubs"], ["leagues", "Leagues"], ["positions", "Positions"], ["icons", "Icons"], ["fun", "Just for fun"]];
   const openShelves = new Set();
   const POS_ORDER = ["keepers", "defenders", "midfield", "wingers", "strikers"];
   function renderHome() {
     const box = $("shelves"); box.textContent = "";
     const sticker = (c, i) => {
       const b = document.createElement("button");
-      b.className = "sticker" + (c.id === "mix" ? " mix hero" : "") + (isOpen(c) ? "" : " locked");
+      b.className = "sticker" + (c.id === "mix" ? " mix hero" : "") + (isOpen(c) ? "" : " locked") + (c.id === myClub ? " mine" : "");
       b.innerHTML = `<span class="no"></span><span class="name"></span><span class="blurb"></span><span class="count"></span>`;
       b.querySelector(".no").textContent = String(i + 1).padStart(2, "0");
       b.prepend(kitEl(c.kit));
       b.querySelector(".name").textContent = c.name;
       b.querySelector(".blurb").textContent = c.blurb;
-      b.querySelector(".count").textContent = isOpen(c) ? `${c.players.length} players` : `Pro pack · ${c.players.length} players`;
-      b.onclick = () => isOpen(c) ? pickCategory(c) : toast(`${c.name} is a Pro pack. Unlocking Pro packs is coming soon.`);
+      b.querySelector(".count").textContent = c.id === myClub ? `Your club · ${c.players.length} players`
+        : isOpen(c) ? `${c.players.length} players` : `${PRICE_ONE} · ${c.players.length} players`;
+      b.onclick = () => isOpen(c) ? pickCategory(c) : renderBuy(c);
       return b;
     };
     box.append(sticker(MIX, 0));
     let n = 1;
     for (const [id, title] of SHELVES) {
-      const rank = (c) => (POS_ORDER.indexOf(c.id) + 1) || 99;
+      const rank = (c) => (c.id === myClub ? -1 : (POS_ORDER.indexOf(c.id) + 1) || 99);
       const packs = ALL.filter((c) => c.shelf === id).sort((a, b) => isOpen(b) - isOpen(a) || rank(a) - rank(b));
       if (!packs.length) continue;
       const sec = document.createElement("section"); sec.className = "shelf" + (openShelves.has(id) ? " open" : "");
@@ -460,6 +504,12 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
       const row = document.createElement("div"); row.className = "shelf-row";
       for (const c of packs) row.append(sticker(c, n++));
       sec.append(head, row); box.append(sec);
+      if (id === "clubs" && (!myClub || myClub === "none")) {
+        const cta = document.createElement("div"); cta.className = "club-cta";
+        cta.innerHTML = `<span class="hint">Your own club's pack is free.</span>`;
+        const go = document.createElement("button"); go.className = "btn small"; go.textContent = "Pick your club";
+        go.onclick = renderClub; cta.append(go); sec.insertBefore(cta, row);
+      }
     }
     $("setup-summary").textContent =
       `${settings.names.length} player${settings.names.length > 1 ? "s" : ""} · ${settings.seconds}s · ${settings.rounds} turn${settings.rounds > 1 ? "s" : ""} each`;
@@ -469,6 +519,48 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     show("home");
   }
   $("strip-end").onclick = () => { game = null; renderHome(); };
+
+  // ---------- pick your club ----------
+  function renderClub() {
+    const g = $("club-grid"); g.textContent = "";
+    for (const c of CLUBS) {
+      const b = document.createElement("button"); b.className = "sticker";
+      b.innerHTML = `<span class="name"></span><span class="blurb"></span>`;
+      b.prepend(kitEl(c.kit));
+      b.querySelector(".name").textContent = c.name; b.querySelector(".blurb").textContent = c.blurb;
+      b.onclick = () => { myClub = c.id; store.set("myclub", myClub); toast(`${c.name} pack unlocked. Enjoy.`); renderHome(); };
+      g.append(b);
+    }
+    show("club");
+  }
+  $("club-skip").onclick = () => { myClub = "none"; store.set("myclub", myClub); renderHome(); };
+
+  // ---------- buy ----------
+  // Payments aren't live yet: the buttons explain that, and a discount code unlocks everything.
+  let buying = null;
+  function renderBuy(c) {
+    buying = c;
+    paintKit($("buy-kit"), c.kit);
+    $("buy-name").textContent = c.name;
+    $("buy-blurb").textContent = `${c.blurb} · ${c.players.length} players`;
+    $("buy-one").textContent = `Buy this pack · ${PRICE_ONE}`;
+    $("buy-all").hidden = c.shelf !== "clubs";
+    $("buy-all").textContent = `All ${CLUBS.length} clubs · ${PRICE_CLUBS}`;
+    $("code-input").value = "";
+    show("buy");
+  }
+  const notLive = () => toast("Payments aren't switched on yet. Got a discount code? Pop it in below.");
+  $("buy-one").onclick = notLive;
+  $("buy-all").onclick = notLive;
+  $("buy-back").onclick = () => renderHome();
+  $("buy-code").onsubmit = (e) => {
+    e.preventDefault();
+    const code = $("code-input").value.trim().toLowerCase();
+    if (!CODES.includes(code)) { toast("That code doesn't work."); return; }
+    owned.add("all"); store.set("owned", [...owned]);
+    toast("Code applied. Every pack is unlocked.");
+    pickCategory(buying);
+  };
   $("strip-resume").onclick = () => renderReady();
 
   function pickCategory(cat) {
@@ -874,7 +966,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   const buzz = () => { beep(494, 0.14, "triangle", 0, 0.16); beep(370, 0.26, "triangle", 0.12, 0.16); };
   const final = () => { beep(523, 0.2, "triangle"); beep(392, 0.2, "triangle", 0.2); beep(262, 0.5, "triangle", 0.4); };
 
-  renderHome();
+  myClub ? renderHome() : renderClub();
   route();
 })();
 </script>
