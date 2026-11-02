@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.headsgone",
+    "sha256_cert_fingerprints": ["1A:AC:0D:EE:D6:4E:92:ED:FE:A4:75:92:D4:C3:D1:18:18:A0:86:DE:F9:9F:55:CF:A3:13:17:E3:4B:0C:F9:20"]
+  }
+}]
