@@ -322,7 +322,10 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
       <button class="btn small" type="submit">Apply</button>
     </div>
   </form>
-  <div class="row"><button class="btn ghost small" id="buy-back">Back</button></div>
+  <div class="row">
+    <button class="btn ghost small" id="buy-back">Back</button>
+    <button class="btn ghost small" id="buy-restore" hidden>Restore purchases</button>
+  </div>
 </section>
 
 <!-- Ready: instructions, then wait for the phone to go on a forehead -->
@@ -405,6 +408,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 <script src="categories.js"></script>
 <script src="clubs.js"></script>
 <script src="club-packs.js"></script>
+<script src="billing.js"></script>
 <script src="wikidata-categories.js"></script>
 <script src="verdicts.js"></script>
 <script src="vendor/react-18.3.1.min.js"></script>
@@ -470,6 +474,10 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   const kitEl = (kit) => { const d = document.createElement("div"); d.setAttribute("aria-hidden", "true"); return paintKit(d, kit); };
   // Paid packs open if: free, ?unlock, your chosen club, bought, or the discount code was used.
   const PRICE_ONE = "£0.99", PRICE_CLUBS = "£4.99";
+  // Play product ids: one per paid pack, plus a bundle for every club pack.
+  const SKU_ALL_CLUBS = "all_clubs";
+  const skuFor = (c) => "pack_" + c.id;
+  const priceOf = (sku, fallback) => window.Billing?.prices[sku] || fallback;
   const CODES = ["whoareya"];
   const isOpen = (c) => c.free || UNLOCKED || c.id === myClub || owned.has("all") || owned.has(c.id) || (c.shelf === "clubs" && owned.has("allclubs"));
   const CLUB_PACKS = CATS.filter((c) => c.shelf === "clubs");
@@ -522,7 +530,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
       if (club) b.querySelector(".place").textContent = club.place;
       b.querySelector(".blurb").textContent = c.blurb;
       b.querySelector(".count").textContent = c.id === myClub ? `Your club · ${c.players.length} players`
-        : isOpen(c) ? `${c.players.length} players` : `${PRICE_ONE} · ${c.players.length} players`;
+        : isOpen(c) ? `${c.players.length} players` : `${priceOf(skuFor(c), PRICE_ONE)} · ${c.players.length} players`;
       b.onclick = () => isOpen(c) ? pickCategory(c) : renderBuy(c);
       return b;
     };
@@ -607,7 +615,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
       b.querySelector(".t span").textContent = c.place + (q || clubTab === "popular" ? ` · ${leagueName[c.league]}` : "");
       const pack = CATS.find((p) => p.id === c.id);
       if (clubMode === "browse") {
-        b.querySelector(".tag").textContent = !pack ? "Soon" : c.id === myClub ? "Your club" : isOpen(pack) ? "Open" : PRICE_ONE;
+        b.querySelector(".tag").textContent = !pack ? "Soon" : c.id === myClub ? "Your club" : isOpen(pack) ? "Open" : priceOf(skuFor(pack), PRICE_ONE);
         b.onclick = () => !pack ? toast(`The ${c.nick} pack is coming soon.`) : isOpen(pack) ? pickCategory(pack) : renderBuy(pack);
       } else {
         b.querySelector(".tag").textContent = pack ? "Pack ready" : "";
@@ -637,15 +645,49 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     $("buy-name").textContent = c.name;
     $("buy-place").textContent = clubById(c.id)?.place || "Locked pack";
     $("buy-blurb").textContent = `${c.blurb} · ${c.players.length} players`;
-    $("buy-one").textContent = `Buy this pack · ${PRICE_ONE}`;
+    $("buy-one").textContent = `Buy this pack · ${priceOf(skuFor(c), PRICE_ONE)}`;
     $("buy-all").hidden = c.shelf !== "clubs";
-    $("buy-all").textContent = `All ${CLUB_PACKS.length} club packs · ${PRICE_CLUBS}`;
+    $("buy-all").textContent = `All ${CLUB_PACKS.length} club packs · ${priceOf(SKU_ALL_CLUBS, PRICE_CLUBS)}`;
+    // Inside the Play app, packs are sold through Google Play only: no code box, but a restore button.
+    const play = window.Billing?.available;
+    $("buy-code").hidden = !!play;
+    $("buy-restore").hidden = !play;
+    // A pack not yet set up as a product in the Play Console can't be bought there.
+    const onSale = (sku) => !play || Boolean(window.Billing.prices[sku]);
+    $("buy-one").disabled = !onSale(skuFor(c));
+    if (!onSale(skuFor(c))) $("buy-one").textContent = "This pack isn't on sale yet";
+    $("buy-all").disabled = !onSale(SKU_ALL_CLUBS);
     $("code-input").value = "";
     show("buy");
   }
   const notLive = () => toast("Payments aren't switched on yet. Got a discount code? Pop it in below.");
-  $("buy-one").onclick = notLive;
-  $("buy-all").onclick = notLive;
+  const saveOwned = () => store.set("owned", [...owned]);
+  async function purchase(sku, unlockId) {
+    if (!window.Billing?.available) return notLive();
+    if (await window.Billing.buy(sku)) {
+      owned.add(unlockId); saveOwned();
+      toast("Unlocked. Enjoy.");
+      buying && isOpen(buying) ? pickCategory(buying) : renderHome();
+    }
+  }
+  $("buy-one").onclick = () => buying && purchase(skuFor(buying), buying.id);
+  $("buy-all").onclick = () => purchase(SKU_ALL_CLUBS, "allclubs");
+  // Owned items on this Google account unlock their packs (also restores after a reinstall).
+  async function syncPurchases() {
+    if (!window.Billing?.available) return 0;
+    let n = 0;
+    for (const id of await window.Billing.owned()) {
+      const unlock = id === SKU_ALL_CLUBS ? "allclubs" : id.startsWith("pack_") ? id.slice(5) : null;
+      if (unlock && !owned.has(unlock)) { owned.add(unlock); n++; }
+    }
+    if (n) saveOwned();
+    return n;
+  }
+  $("buy-restore").onclick = async () => {
+    const n = await syncPurchases();
+    toast(n ? "Purchases restored." : "Nothing new to restore on this Google account.");
+    if (buying && isOpen(buying)) pickCategory(buying);
+  };
   $("buy-back").onclick = () => renderHome();
   $("buy-code").onsubmit = (e) => {
     e.preventDefault();
@@ -1061,6 +1103,15 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   const final = () => { beep(523, 0.2, "triangle"); beep(392, 0.2, "triangle", 0.2); beep(262, 0.5, "triangle", 0.4); };
 
   myClub ? renderHome() : renderClub("pick");
+  // In the Play app: load local prices and restore purchases, then redraw whatever is on screen.
+  if (window.Billing) {
+    const skus = [...CATS.filter((c) => !c.free).map(skuFor), SKU_ALL_CLUBS];
+    window.Billing.init(skus).then(async (ok) => {
+      if (!ok) return;
+      await syncPurchases();
+      if (!$("home").hidden) renderHome();
+    });
+  }
   route();
 })();
 </script>

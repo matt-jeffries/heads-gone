@@ -1,9 +1,9 @@
 // Offline support: the game works with no signal once it has been opened once.
 // Same-site files: network first (so updates show straight away), cached copy when offline.
 // Fonts and the animation library from CDNs: cached copy first, they never change.
-const CACHE = "heads-gone-v1";
+const CACHE = "heads-gone-v2";
 const CORE = ["./", "index.html", "categories.js", "clubs.js", "club-packs.js", "wikidata-categories.js", "verdicts.js",
-  "football-animations.js", "finale-react.js", "vendor/react-18.3.1.min.js", "vendor/react-dom-18.3.1.min.js", "manifest.webmanifest", "privacy.html",
+  "football-animations.js", "finale-react.js", "billing.js", "vendor/react-18.3.1.min.js", "vendor/react-dom-18.3.1.min.js", "manifest.webmanifest", "privacy.html",
   "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png", "icons/apple-touch-icon.png"];
 const CDN = ["https://fonts.googleapis.com/", "https://fonts.gstatic.com/"];
 
