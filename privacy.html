@@ -25,10 +25,10 @@
 <main>
   <a class="back" href="./">← Back to the game</a>
   <h1>Privacy policy</h1>
-  <p class="meta">Head's Gone! · Last updated 2 November 2026</p>
+  <p class="meta">Head's Gone! · Last updated 3 November 2026</p>
 
   <p>Head's Gone! is a football guessing game for playing with friends. It is run by Matthew Jeffries, trading as Head's Gone! ("we", "us"). This policy explains what information the game uses, where it goes, and what your rights are under UK data protection law (the UK GDPR and the Data Protection Act 2018).</p>
-  <p><strong>The short version:</strong> there are no accounts. We don't collect your name or email address, and we don't run analytics or advertising. Everything you set up in the game stays on your own device.</p>
+  <p><strong>The short version:</strong> there are no accounts. We don't collect your name or email address, and we don't run advertising or any tracking that identifies you. We only keep anonymous totals, such as how often each pack is played. Everything you set up in the game stays on your own device.</p>
 
   <h2>What stays on your device</h2>
   <p>The game saves a few things in your browser's local storage so they are still there next time you play. This information never leaves your device and we can't see it.</p>
@@ -41,6 +41,9 @@
   </table>
   <p>You can delete all of it at any time by clearing this site's data in your browser settings, or by uninstalling the app.</p>
 
+  <h2>Anonymous play counts</h2>
+  <p>To see which packs people enjoy and whether prices are fair, the game counts a few things: opening the game, playing a turn, finishing a game, opening a buy screen, buying a pack, using a discount code, and which club you picked as yours. Each count is sent as just the event and the pack, for example "turn played: Magpies". No name, account, device ID, advertising ID or cookie is attached, and we don't store your IP address with it. We only ever see daily totals, so nothing can be traced back to you. The totals are kept for up to 13 months on Upstash, a database service, in our Vercel hosting.</p>
+
   <h2>Motion sensors</h2>
   <p>While a round is running, the game reads your phone's tilt so it can tell when you tip it down for a correct answer or up to pass. These readings are only used on the device, at that moment. They are not stored or sent anywhere. On iPhone you'll be asked for permission first, and you can say no and use the on-screen buttons instead.</p>
 
@@ -49,6 +52,7 @@
   <table>
     <tr><th>Service</th><th>What it does</th><th>What it receives</th></tr>
     <tr><td>Vercel</td><td>Hosts the website</td><td>Standard request information, kept in server logs for a short time for security and reliability</td></tr>
+    <tr><td>Upstash (via Vercel)</td><td>Stores the anonymous play counts</td><td>Only the event and pack name, as daily totals</td></tr>
     <tr><td>Google Play (Android app only)</td><td>Takes payment for paid packs</td><td>Your purchase, handled by Google. We only learn which packs your account owns</td></tr>
     <tr><td>Google Fonts</td><td>Supplies the fonts</td><td>Your IP address and browser information when the fonts load</td></tr>
   </table>
@@ -65,7 +69,7 @@
   <p>Under UK data protection law you have the right to ask what personal information we hold about you, and to have it corrected or deleted. Because the game doesn't send us any personal information, we normally won't hold any. You can still contact us with questions, and you can complain to the Information Commissioner's Office at <a href="https://ico.org.uk">ico.org.uk</a>.</p>
 
   <h2>Changes</h2>
-  <p>If the game starts collecting anything new, such as through adverts or analytics, we'll update this page before it happens and change the date at the top.</p>
+  <p>If the game starts collecting anything new, such as through adverts, we'll update this page before it happens and change the date at the top.</p>
 
   <h2>Contact</h2>
   <p>Email <a href="mailto:matt@headsgone.app">matt@headsgone.app</a>.</p>

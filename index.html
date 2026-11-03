@@ -499,6 +499,13 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     if (settings.names.join() === "Player 1,Player 2") settings.names = ["Player 1"];
     store.set("oneoff", true); store.set("settings", settings);
   }
+  // Anonymous counts (privacy.html): event name + pack id only. No ids, no cookies, nothing about the player.
+  // Only sent from the live site and app; local copies and previews send nothing.
+  function track(e, p) {
+    if (location.hostname !== "headsgone.app") return;
+    try { navigator.sendBeacon("/api/e", JSON.stringify({ e, p: p || "" })); } catch {}
+  }
+  track("open", document.referrer.startsWith("android-app://") ? "android" : "web");
   const solo = () => game.players.length === 1;
   let game = null;        // { players:[{name,score}], turn, totalTurns, category, decks:{} }
 
@@ -630,7 +637,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   $("club-search").oninput = renderClubList;
   $("club-yes").onclick = () => {
     const c = clubById(clubPick); if (!c) return;
-    myClub = c.id; store.set("myclub", myClub);
+    myClub = c.id; store.set("myclub", myClub); track("myclub", c.id);
     toast(CATS.some((p) => p.id === c.id) ? `${c.nick} pack unlocked. Enjoy.` : `Nice. The ${c.nick} pack is on its way, and it'll be free for you when it lands.`);
     renderHome();
   };
@@ -658,6 +665,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     if (!onSale(skuFor(c))) $("buy-one").textContent = "This pack isn't on sale yet";
     $("buy-all").disabled = !onSale(SKU_ALL_CLUBS);
     $("code-input").value = "";
+    track("buy_view", c.id);
     show("buy");
   }
   const notLive = () => toast("Payments aren't switched on yet. Got a discount code? Pop it in below.");
@@ -666,6 +674,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     if (!window.Billing?.available) return notLive();
     if (await window.Billing.buy(sku)) {
       owned.add(unlockId); saveOwned();
+      track("purchase", sku);
       toast("Unlocked. Enjoy.");
       buying && isOpen(buying) ? pickCategory(buying) : renderHome();
     }
@@ -694,6 +703,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     const code = $("code-input").value.trim().toLowerCase();
     if (!CODES.includes(code)) { toast("That code doesn't work."); return; }
     owned.add("all"); store.set("owned", [...owned]);
+    track("code", "");
     toast("Code applied. Every pack is unlocked.");
     pickCategory(buying);
   };
@@ -842,6 +852,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   }
   function beginClock() {
     turn.phase = "live";
+    track("turn", game.category.id);
     turn.ends = performance.now() + settings.seconds * 1000;
     turn.armed = false;              // wait for the phone to come back upright before the first tilt counts
     $("taps").hidden = false;
@@ -928,6 +939,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     const log = turn.log; turn = null; release();
     game.turn++;
     const finished = game.turn >= game.totalTurns;
+    if (finished) track("finish", game.category.id);
 
     $("res-meta").textContent = solo() ? game.category.name : `${p.name} · ${game.category.name}`;
     $("res-table").hidden = $("res-table-label").hidden = solo();
