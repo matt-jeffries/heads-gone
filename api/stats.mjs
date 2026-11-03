@@ -1,7 +1,7 @@
 // Totals for the last N days, for Matt only: /api/stats?key=<STATS_KEY>&days=30
-const EVENTS = ["open", "turn", "finish", "buy_view", "purchase", "code", "myclub"];
+const EVENTS = ["open", "turn", "finish", "buy_view", "purchase", "code", "myclub", "error"];
 const LABELS = { open: "App opened", turn: "Turns played", finish: "Games finished", buy_view: "Buy screen opened",
-  purchase: "Purchases", code: "Discount code used", myclub: "Picked as my club" };
+  purchase: "Purchases", code: "Discount code used", myclub: "Picked as my club", error: "Game errors" };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 export default async function handler(req, res) {
@@ -44,5 +44,6 @@ table{border-collapse:collapse;width:100%;max-width:560px}td,th{text-align:left;
 <h2>Buy screen opened, by pack</h2><table>${top("buy_view")}</table>
 <h2>Purchases</h2><table>${top("purchase")}</table>
 <h2>Clubs people support</h2><table>${top("myclub")}</table>
+<h2>Game errors</h2><table>${top("error")}</table>
 <h2>By day</h2><table><tr><th>Date</th><th>Opens</th><th>Turns</th><th>Buy views</th><th>Purchases</th></tr>${dates.map((d) => `<tr><td>${d}</td><td>${byDay[d]?.open || 0}</td><td>${byDay[d]?.turn || 0}</td><td>${byDay[d]?.buy_view || 0}</td><td>${byDay[d]?.purchase || 0}</td></tr>`).join("")}</table>`);
 }

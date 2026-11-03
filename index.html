@@ -506,6 +506,12 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     try { navigator.sendBeacon("/api/e", JSON.stringify({ e, p: p || "" })); } catch {}
   }
   track("open", document.referrer.startsWith("android-app://") ? "android" : "web");
+  // Game errors: the message and where it happened, nothing else, counted like the events above.
+  let errs = 0;
+  const errKey = (m, f, l) => (String(m || "error").slice(0, 120) + " @" + String(f || "").split("/").pop() + ":" + (l || 0)).replace(/\s+/g, " ");
+  const sendErr = (k) => { if (location.hostname !== "headsgone.app" || errs++ >= 5) return; try { navigator.sendBeacon("/api/e", JSON.stringify({ e: "error", p: k })); } catch {} };
+  window.addEventListener("error", (ev) => sendErr(errKey(ev.message, ev.filename, ev.lineno)));
+  window.addEventListener("unhandledrejection", (ev) => sendErr(errKey(ev.reason?.message || ev.reason, "promise", 0)));
   const solo = () => game.players.length === 1;
   let game = null;        // { players:[{name,score}], turn, totalTurns, category, decks:{} }
 

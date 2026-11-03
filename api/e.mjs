@@ -1,7 +1,7 @@
 // Anonymous event counter. Stores daily totals only: "date:event" -> {pack id: count}.
 // Nothing about the sender (IP, device, id) is read or kept.
 // Storage: Upstash Redis connected through the Vercel dashboard (Storage tab), which sets the env vars below.
-const EVENTS = new Set(["open", "turn", "finish", "buy_view", "purchase", "code", "myclub"]);
+const EVENTS = new Set(["open", "turn", "finish", "buy_view", "purchase", "code", "myclub", "error"]);
 const ID = /^[a-z0-9_-]{0,40}$/;
 
 export default async function handler(req, res) {
@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   let body = req.body;
   if (typeof body === "string") { try { body = JSON.parse(body); } catch { body = null; } }
   const e = body?.e, p = String(body?.p ?? "");
-  if (!EVENTS.has(e) || !ID.test(p)) return res.status(400).end();
+  if (!EVENTS.has(e) || (e === "error" ? p.length > 200 : !ID.test(p))) return res.status(400).end();
   const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
   if (!url || !token) return res.status(204).end();
