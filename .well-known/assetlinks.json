@@ -3,6 +3,9 @@
   "target": {
     "namespace": "android_app",
     "package_name": "app.headsgone",
-    "sha256_cert_fingerprints": ["1A:AC:0D:EE:D6:4E:92:ED:FE:A4:75:92:D4:C3:D1:18:18:A0:86:DE:F9:9F:55:CF:A3:13:17:E3:4B:0C:F9:20"]
+    "sha256_cert_fingerprints": [
+      "1A:AC:0D:EE:D6:4E:92:ED:FE:A4:75:92:D4:C3:D1:18:18:A0:86:DE:F9:9F:55:CF:A3:13:17:E3:4B:0C:F9:20",
+      "2A:18:E0:96:C6:EF:77:E0:64:D4:DF:F6:32:FD:B2:9C:CF:07:86:A8:3A:F7:C0:83:D6:66:48:BF:B8:FA:83:32"
+    ]
   }
 }]
