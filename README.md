@@ -11,4 +11,6 @@ forehead, and your mates describe the player. Tilt down = got it, tilt up = pass
 - `scripts/fetch-wikidata.mjs` - `node scripts/fetch-wikidata.mjs` queries Wikidata SPARQL and rewrites `wikidata-categories.js`.
 
 Controls: tilt (DeviceOrientation; iOS asks permission on Start), the Pass / Got it buttons, or Up / Down arrow keys.
+Pause (or Escape, or leaving the app) freezes the turn; Resume carries on with the same card, clock and score.
+Settings (gear on the home screen): sound, vibration, share, rate, privacy policy, version. Bump `APP_VERSION` in `index.html` with each Play build.
 Tilt detection uses cos(beta)·cos(gamma), the vertical component of the screen's facing direction, so it works in portrait or landscape.

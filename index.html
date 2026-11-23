@@ -32,7 +32,8 @@
   --body: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
   color-scheme: dark;
 }
-html, body { height: 100%; }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
 [hidden] { display: none !important; }
 body {
   background: var(--navy-deep);
@@ -46,15 +47,23 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outl
 
 .screen {
   height: 100%;
+  height: 100dvh;
   overflow-y: auto;
-  padding-block: 20px 28px;
+  -webkit-overflow-scrolling: touch;
+  padding-top: calc(20px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   display: flex; flex-direction: column; gap: 20px;
   max-width: 720px; margin: 0 auto;
 }
-.wordmark { font: 400 clamp(52px, 15vw, 96px)/0.9 var(--display); letter-spacing: 0.01em; color: var(--gold); text-transform: uppercase; text-wrap: balance; }
-.wordmark span { color: var(--chalk); }
+.wordmark { font: 400 clamp(52px, 15vw, 96px)/0.9 var(--display); letter-spacing: 0.01em; color: var(--chalk); text-transform: uppercase; }
+.wordmark span { display: block; color: var(--gold); }
+.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.gear { flex: none; width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; color: var(--chalk-dim); box-shadow: inset 0 0 0 2px var(--navy-line); }
+.gear svg { width: 24px; height: 24px; }
+.sticker .best { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--chalk); margin-top: -4px; }
+.sticker.mix .best { color: var(--navy-deep); }
 .lede { color: var(--chalk-dim); max-width: 34em; margin: 0; }
 h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; letter-spacing: 0.01em; text-wrap: balance; }
 .eyebrow { font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
@@ -194,7 +203,14 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 #play.correct .taps button, #play.pass .taps button { background: rgba(12,26,66,.25); }
 .quit { font: 600 15px var(--body); color: var(--chalk-dim); text-transform: uppercase; letter-spacing: .08em; }
 
-/* Results */
+/* Results: the action buttons stick to the bottom so they're never cut off on tall phones */
+#results { padding-bottom: 0; }
+#results > .row:last-child { position: sticky; bottom: 0; margin-top: auto; flex-wrap: nowrap;
+  margin-inline: -16px; padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(to bottom, rgba(12,26,66,0), var(--navy-deep) 14px); z-index: 2; }
+#results > .row:last-child .btn { flex: 1 1 0; min-width: 0; padding: 0 10px; font-size: clamp(16px, 4.8vw, 22px); }
+.new-best { display: inline-block; margin-left: 10px; padding: 4px 10px; border-radius: 999px; background: var(--gold); color: var(--navy-deep); font: 400 16px/1.2 var(--display); text-transform: uppercase; letter-spacing: .04em; vertical-align: middle; }
+.best-line { color: var(--chalk-dim); font-size: 15px; margin: 6px 0 0; }
 .big-score { font: 400 120px/0.85 var(--display); color: var(--gold); font-variant-numeric: tabular-nums; }
 .log { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; }
 .log li { padding: 8px 12px; border-radius: 8px; display: flex; gap: 10px; align-items: baseline; font-size: 17px; }
@@ -233,6 +249,28 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 .demo-lines button:hover { box-shadow: inset 0 0 0 2px var(--gold); }
 #seg-margin button { padding: 0 11px; }
 
+/* Pause (Stop during a turn) */
+.pause { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px));
+  background: rgba(12,26,66,.96); text-align: center; }
+.pause h2 { font-size: clamp(44px, 12vw, 72px); color: var(--gold); }
+.pause .hint { margin-bottom: 6px; }
+.pause .btn { width: min(320px, 100%); }
+
+/* Settings sheet */
+.sheet-back { position: fixed; inset: 0; z-index: 6; background: rgba(4,10,28,.6); display: flex; align-items: flex-end; justify-content: center; }
+.sheet { width: 100%; max-width: 520px; max-height: 90dvh; overflow-y: auto; background: var(--navy); border-radius: 18px 18px 0 0;
+  padding: 20px 18px calc(18px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 6px; }
+.sheet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.set-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 54px; padding: 0 4px;
+  border-bottom: 1px solid var(--navy-line); font-size: 18px; text-align: left; color: var(--chalk); text-decoration: none; width: 100%; }
+.set-row .go { color: var(--chalk-dim); font-size: 22px; }
+.switch { flex: none; width: 52px; height: 30px; border-radius: 99px; background: var(--navy-line); position: relative; transition: background .15s; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: var(--chalk); transition: transform .15s; }
+[aria-checked="true"] .switch { background: var(--correct); }
+[aria-checked="true"] .switch::after { transform: translateX(22px); }
+.version { margin: 10px 4px 0; font-size: 14px; color: var(--chalk-dim); }
+
 .toast { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
   background: var(--chalk); color: var(--navy-deep); padding: 10px 16px; border-radius: 10px; font-size: 15px; max-width: calc(100% - 32px); z-index: 5; }
 
@@ -241,8 +279,11 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 
 <!-- Home: pick a category -->
 <section class="screen" id="home">
-  <div>
-    <div class="wordmark">Head's <span>Gone!</span></div>
+  <div class="top">
+    <h1 class="wordmark" style="margin:0">Head's <span>Gone!</span></h1>
+    <button class="gear" id="open-settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
   </div>
   <p class="lede">Stick the phone on your forehead. Your mates describe the player. Tilt down when you get it, tilt up to pass.</p>
   <div class="strip" id="game-strip" hidden>
@@ -256,7 +297,6 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     <button class="btn small ghost" id="open-demo">Preview full time</button>
   </div>
   <div id="shelves"></div>
-  <p class="hint"><a href="privacy.html" style="color:inherit">Privacy policy</a></p>
 </section>
 
 <!-- Setup -->
@@ -352,7 +392,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 <section class="screen" id="play" hidden>
   <div class="hud">
     <span class="clock" id="clock">60</span>
-    <button class="quit" id="quit">Stop</button>
+    <button class="quit" id="quit">Pause</button>
     <span id="hud-score">0</span>
   </div>
   <div class="card">
@@ -360,6 +400,13 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
       <div class="card-tag" id="card-tag" hidden></div>
       <div class="card-name" id="card-name"></div>
     </div>
+  </div>
+  <div class="pause" id="pause" role="dialog" aria-modal="true" aria-labelledby="pause-title" hidden>
+    <h2 id="pause-title">Paused</h2>
+    <p class="hint" id="pause-info"></p>
+    <button class="btn" id="pause-resume">Resume</button>
+    <button class="btn ghost" id="pause-restart">Restart turn</button>
+    <button class="btn ghost" id="pause-menu">Menu</button>
   </div>
   <div class="taps" id="taps">
     <button class="p" id="tap-pass">Pass</button>
@@ -396,6 +443,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   <div class="row" style="align-items:flex-end; gap:16px">
     <div class="big-score" id="res-score">0</div>
     <h2 id="res-title"></h2>
+    <p class="best-line" id="res-best" hidden></p>
   </div>
   <ul class="log" id="res-log"></ul>
   <div class="eyebrow" id="res-table-label">Table</div>
@@ -405,6 +453,21 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     <button class="btn ghost" id="res-cat">Change category</button>
   </div>
 </section>
+
+<div class="sheet-back" id="settings" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="sheet-head">
+      <h2 id="settings-title">Settings</h2>
+      <button class="btn small ghost" id="settings-close">Done</button>
+    </div>
+    <button class="set-row" id="set-sound" role="switch" aria-checked="true"><span>Sound</span><span class="switch" aria-hidden="true"></span></button>
+    <button class="set-row" id="set-vibrate" role="switch" aria-checked="true"><span>Vibration</span><span class="switch" aria-hidden="true"></span></button>
+    <button class="set-row" id="set-share"><span>Share Head's Gone!</span><span class="go" aria-hidden="true">›</span></button>
+    <a class="set-row" id="set-rate" href="https://play.google.com/store/apps/details?id=app.headsgone" target="_blank" rel="noopener"><span>Rate on Google Play</span><span class="go" aria-hidden="true">›</span></a>
+    <a class="set-row" href="privacy.html"><span>Privacy policy</span><span class="go" aria-hidden="true">›</span></a>
+    <p class="version" id="set-version"></p>
+  </div>
+</div>
 
 <div class="toast" id="toast" hidden></div>
 
@@ -495,6 +558,11 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   };
 
   const settings = store.get("settings", { names: ["Player 1"], seconds: 60, rounds: 1 });
+  // Sound and vibration switches (Settings), and each pack's best single-turn score.
+  const APP_VERSION = "1.1.0";
+  const prefs = { sound: true, vibrate: true, ...store.get("prefs", {}) };
+  const best = store.get("best", {});              // pack id -> most correct in one turn
+  const buzzPhone = (pattern) => { if (prefs.vibrate) try { navigator.vibrate?.(pattern); } catch {} };
   let myClub = store.get("myclub", null);           // pack id, or "none" if skipped
   const owned = new Set(store.get("owned", []));     // pack ids, "allclubs" or "all"
   // One-off rounds are now the default: move people off the old two-player default once.
@@ -539,7 +607,8 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
       const b = document.createElement("button");
       b.className = "sticker" + (c.id === "mix" ? " mix hero" : "") + (isOpen(c) ? "" : " locked") + (c.id === myClub ? " mine" : "");
       const club = c.shelf === "clubs" ? clubById(c.id) : null;
-      b.innerHTML = `<span class="no"></span>${club ? `<span class="place"></span>` : ""}<span class="name"></span><span class="blurb"></span><span class="count"></span>`;
+      b.innerHTML = `<span class="no"></span>${club ? `<span class="place"></span>` : ""}<span class="name"></span><span class="blurb"></span><span class="count"></span>${best[c.id] ? `<span class="best"></span>` : ""}`;
+      if (best[c.id]) b.querySelector(".best").textContent = `Best: ${best[c.id]}`;
       b.querySelector(".no").textContent = String(i + 1).padStart(2, "0");
       b.prepend(kitEl(c.kit));
       b.querySelector(".name").textContent = c.name;
@@ -861,6 +930,8 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   function startTurn() {
     turn = { log: [], score: 0, card: null, phase: "countdown", ends: 0, raf: 0, locked: false };
     show("play");
+    $("pause").hidden = true;
+    $("quit").hidden = false;
     $("play").className = "screen";
     $("hud-score").textContent = "0";
     $("clock").textContent = settings.seconds;
@@ -881,12 +952,15 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     turn.armed = false;              // wait for the phone to come back upright before the first tilt counts
     $("taps").hidden = false;
     nextCard();
-    let lastSec = settings.seconds;
+    turn.lastSec = settings.seconds;
+    tickClock();
+  }
+  function tickClock() {
     const tick = () => {
-      if (!turn || turn.phase === "done") return;
+      if (!turn || turn.phase !== "live") return;
       const left = Math.max(0, Math.ceil((turn.ends - performance.now()) / 1000));
-      if (left !== lastSec) {
-        lastSec = left;
+      if (left !== turn.lastSec) {
+        turn.lastSec = left;
         $("clock").textContent = left;
         $("clock").classList.toggle("low", left <= 5);
         if (left <= 5 && left > 0) beep(660, 0.08);
@@ -911,9 +985,11 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     $("play").className = "screen " + (correct ? "correct" : "pass");
     setCard(correct ? "Correct!" : "Pass", turn.card);
     correct ? chime() : buzz();
-    try { navigator.vibrate?.(correct ? 200 : [40, 60, 40]); } catch {}
-    setTimeout(() => {
-      if (!turn || turn.phase !== "live") return;
+    buzzPhone(correct ? 200 : [40, 60, 40]);
+    turn.flash = setTimeout(() => {
+      if (!turn) return;
+      turn.flash = 0;
+      if (turn.phase !== "live") return;
       $("play").className = "screen";
       turn.locked = false;
       nextCard();
@@ -923,25 +999,58 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     turn.phase = "done";
     if (turn.card && !turn.locked) turn.log.push({ name: turn.card, ok: false });
     $("play").className = "screen over";
-    $("taps").hidden = true;
+    $("taps").hidden = true; $("quit").hidden = true;
     setCard("Time's up!");
     final();
     setTimeout(showResults, 1400);
   }
-  function stopTurn() {
-    if (!turn) return;
+  // Pause: freezes the clock, the card and the score. Resume carries on exactly where it stopped.
+  function pauseTurn() {
+    if (!turn || (turn.phase !== "live" && turn.phase !== "countdown")) return;
     clearTimeout(turn.cd); cancelAnimationFrame(turn.raf);
+    if (turn.flash) { clearTimeout(turn.flash); turn.flash = 0; turn.needNext = true; }   // paused mid "Correct!" flash
+    turn.wasPhase = turn.phase;
+    turn.left = turn.phase === "live" ? Math.max(0, turn.ends - performance.now()) : settings.seconds * 1000;
+    turn.phase = "paused";
+    $("taps").hidden = true; $("quit").hidden = true;
+    const secs = Math.ceil(turn.left / 1000);
+    $("pause-info").textContent = turn.wasPhase === "live"
+      ? `${secs}s left · ${turn.score} correct so far` : "The turn hasn't started yet.";
+    $("pause").hidden = false;
+    $("pause-resume").focus();
+  }
+  function resumeTurn() {
+    if (!turn || turn.phase !== "paused") return;
+    $("pause").hidden = true; $("quit").hidden = false;
+    unlockAudio(); wake();
+    if (turn.wasPhase !== "live") { startTurn(); return; }   // paused during 3-2-1: count down again
+    turn.phase = "live";
+    turn.armed = false;                // phone has to come back upright before a tilt counts
+    turn.ends = performance.now() + turn.left;
+    $("taps").hidden = false;
+    if (turn.needNext) { turn.needNext = false; $("play").className = "screen"; turn.locked = false; nextCard(); }
+    tickClock();
+  }
+  function quitTurn() {
+    if (turn) { clearTimeout(turn.cd); clearTimeout(turn.flash); cancelAnimationFrame(turn.raf); }
     turn = null; release();
-    game.turn > 0 ? renderHome() : renderPack();   // not straight back to "ready", or it would restart while still on a head
+    $("pause").hidden = true;
   }
   $("tap-correct").onclick = () => answer(true);
   $("tap-pass").onclick = () => answer(false);
-  $("quit").onclick = stopTurn;
+  $("quit").onclick = pauseTurn;
+  $("pause-resume").onclick = resumeTurn;
+  $("pause-restart").onclick = () => { quitTurn(); startTurn(); };
+  // Menu: mid-way through a multi-player game, the home screen offers Carry on; otherwise it's a fresh start.
+  $("pause-menu").onclick = () => { quitTurn(); if (game.turn === 0) game = null; renderHome(); };
+  // Leaving the app (home button, a call) pauses the turn, so the clock doesn't run out in the background.
+  document.addEventListener("visibilitychange", () => { if (document.hidden) pauseTurn(); });
   document.addEventListener("keydown", (e) => {
     if ($("play").hidden) return;
+    if (turn?.phase === "paused") { if (e.key === "Escape") { e.preventDefault(); resumeTurn(); } return; }
     if (e.key === "ArrowDown" || e.key === " ") { e.preventDefault(); answer(true); }
     if (e.key === "ArrowUp") { e.preventDefault(); answer(false); }
-    if (e.key === "Escape") stopTurn();
+    if (e.key === "Escape") pauseTurn();
   });
 
   // Shrink the name until it fits the card.
@@ -967,8 +1076,13 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
 
     $("res-meta").textContent = solo() ? game.category.name : `${p.name} · ${game.category.name}`;
     $("res-table").hidden = $("res-table-label").hidden = solo();
-    $("res-score").textContent = log.filter((l) => l.ok).length;
-    $("res-title").textContent = log.some((l) => l.ok) ? "Correct" : "Nil. Unlucky.";
+    const got = log.filter((l) => l.ok).length, id = game.category.id, prev = best[id] || 0;
+    if (got > prev) { best[id] = got; store.set("best", best); }
+    $("res-score").textContent = got;
+    $("res-title").textContent = got ? "Correct" : "Nil. Unlucky.";
+    if (got > prev && prev > 0) { const t = document.createElement("span"); t.className = "new-best"; t.textContent = "New best"; $("res-title").append(t); }
+    $("res-best").hidden = !prev || got > prev;
+    $("res-best").textContent = `Your best for ${game.category.name}: ${prev}`;
     const ul = $("res-log"); ul.textContent = "";
     for (const l of log) { const li = document.createElement("li"); li.className = l.ok ? "ok" : "no"; li.textContent = l.name; ul.append(li); }
 
@@ -1130,7 +1244,7 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
     try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); ac.resume(); } catch {}
   }
   function beep(freq, dur, type = "sine", when = 0, vol = 0.2) {
-    if (!ac) return;
+    if (!ac || !prefs.sound) return;
     const t = ac.currentTime + when, o = ac.createOscillator(), g = ac.createGain();
     o.type = type; o.frequency.value = freq;
     g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
@@ -1140,6 +1254,27 @@ h2 { font: 400 32px/1 var(--display); text-transform: uppercase; margin: 0; lett
   // A soft falling "uh-oh" for a pass: high enough for phone speakers, gentle enough not to grate.
   const buzz = () => { beep(494, 0.14, "triangle", 0, 0.16); beep(370, 0.26, "triangle", 0.12, 0.16); };
   const final = () => { beep(523, 0.2, "triangle"); beep(392, 0.2, "triangle", 0.2); beep(262, 0.5, "triangle", 0.4); };
+
+  // ---------- settings ----------
+  const SITE = "https://headsgone.app";
+  function renderSettings() {
+    $("set-sound").setAttribute("aria-checked", prefs.sound);
+    $("set-vibrate").setAttribute("aria-checked", prefs.vibrate);
+    $("set-version").textContent = `Version ${APP_VERSION}`;
+  }
+  const toggle = (k) => { prefs[k] = !prefs[k]; store.set("prefs", prefs); renderSettings(); if (k === "vibrate") buzzPhone(60); };
+  $("set-sound").onclick = () => { toggle("sound"); if (prefs.sound) { unlockAudio(); chime(); } };
+  $("set-vibrate").onclick = () => toggle("vibrate");
+  $("set-share").onclick = async () => {
+    const data = { title: "Head's Gone!", text: "The football forehead guessing game. Get it on your head.", url: SITE };
+    try { if (navigator.share) { await navigator.share(data); return; } } catch (e) { if (e?.name === "AbortError") return; }
+    try { await navigator.clipboard.writeText(SITE); toast("Link copied. Send it to your mates."); } catch { toast(SITE); }
+  };
+  const closeSettings = () => { $("settings").hidden = true; $("open-settings").focus(); };
+  $("open-settings").onclick = () => { renderSettings(); $("settings").hidden = false; $("settings-close").focus(); };
+  $("settings-close").onclick = closeSettings;
+  $("settings").onclick = (e) => { if (e.target === $("settings")) closeSettings(); };
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("settings").hidden) closeSettings(); });
 
   myClub ? renderHome() : renderClub("pick");
   // In the Play app: load local prices and restore purchases, then redraw whatever is on screen.
